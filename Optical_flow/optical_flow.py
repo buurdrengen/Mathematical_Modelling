@@ -2,19 +2,21 @@
 import matplotlib.pyplot as plt
 import os
 import skimage
+from skimage import io, color
 import scipy
+from scipy import ndimage
 import numpy as np
 
 im_3d = np.zeros((256, 256, 64))
-for i, image_location in enumerate(os.listdir('Mathematical_Modelling/Optical_flow/toyProblem_F22')):
-    image = skimage.io.imread(f"Mathematical_Modelling/Optical_flow/toyProblem_F22/{image_location}")
-    im_gray = skimage.color.rgb2gray(image)
+for i, image_location in enumerate(np.sort(os.listdir('Optical_flow/toyProblem_F22'))):
+    image = io.imread(f"Optical_flow/toyProblem_F22/{image_location}")
+    im_gray = color.rgb2gray(image)
     im_3d[:,:, i] = im_gray
 
 
-for i, image_location in enumerate(os.listdir('Mathematical_Modelling/Optical_flow/toyProblem_F22')):
-    image = skimage.io.imread(f"Mathematical_Modelling/Optical_flow/toyProblem_F22/{image_location}")
-    im_gray = skimage.color.rgb2gray(image)
+for i, image_location in enumerate(np.sort(os.listdir('Optical_flow/toyProblem_F22'))):
+    image = io.imread(f"Optical_flow/toyProblem_F22/{image_location}")
+    im_gray = color.rgb2gray(image)
 
     """
     Warmup: Making the video
@@ -32,19 +34,19 @@ for i, image_location in enumerate(os.listdir('Mathematical_Modelling/Optical_fl
     Vx = im_gray[:, 1:] - im_gray[:, :-1]
     Vt = im_3d[:, :, 1:] - im_3d[:, :, :-1]
 
-    # if i < 63:
-    #     skimage.io.imshow(Vt[:, :, i])
-    #     plt.title(f"frame {range(64)[i]}")
+    if i < 63:
+        skimage.io.imshow(Vt[:, :, i], vmin = -1, vmax = 1)
+        plt.title(f"frame {i+1}")
 
-    #     plt.pause(1/24)
-    #     plt.clf()
+        plt.pause(1/24)
+        plt.clf()
 
-    Vy_prewitt = scipy.ndimage.prewitt(im_gray, axis=0)
-    Vx_prewitt = scipy.ndimage.prewitt(im_gray, axis=1)
-    # Vx_prewitt = scipy.ndimage.prewitt(im_3d, axis=2)
+    Vy_prewitt = ndimage.prewitt(im_gray, axis=0)
+    Vx_prewitt = ndimage.prewitt(im_gray, axis=1)
+    #Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
     
-    # skimage.io.imshow(Vx_prewitt)
-    # plt.title(f"frame {range(64)[i]}")
+    # io.imshow(Vy_prewitt)
+    # plt.title(f"frame {i}")
 
     # plt.pause(1/24)
     # plt.clf()
