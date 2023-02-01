@@ -20,17 +20,21 @@ def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient")
     # Set up figure parameters
     fig, [axx,axy,axt] = plt.subplots(1, 3, figsize=(14, 4))
     cb_ax = fig.add_axes([0.91, 0.1, 0.02, 0.8])
-    im = axt.imshow(np.random.random((2,2)), vmin = vmin, vmax = vmax, cmap = cmap)
-    fig.colorbar(mappable=im, cax=cb_ax)
+
+    # Initiate the figure
+    axx.set_title("Gradient x"); axy.set_title("Gradient y"); axt.set_title("Gradient t")
+    imx = axx.imshow(Vx[:,:,0], vmin = vmin, vmax = vmax, cmap = cmap)
+    imy = axy.imshow(Vy[:,:,0], vmin = vmin, vmax = vmax, cmap = cmap)
+    imt = axt.imshow(Vt[:,:,0], vmin = vmin, vmax = vmax, cmap = cmap)
+    fig.colorbar(mappable=imt, cax=cb_ax)
 
     # Iterate the plot
     for i in range(N_im):
         fig.suptitle(f"{title} - Frame {i+1}")
-        axx.cla(); axy.cla(); axt.cla()
-        axx.set_title("Gradient x"); axy.set_title("Gradient y"); axt.set_title("Gradient t")
-        axx.imshow(Vx[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
-        axy.imshow(Vy[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
-        axt.imshow(Vt[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
+        #axx.cla(); axy.cla(); axt.cla()
+        imx.set_data(Vx[:,:,i])
+        imy.set_data(Vy[:,:,i])
+        imt.set_data(Vt[:,:,i])
         plt.pause(1/FPS)
 
     plt.close(fig)
@@ -54,12 +58,12 @@ for i, image_location in enumerate(image_name_list):
     im_3d[:,:, i] = im_gray
 
 # Displaying the image sequense
+imm = skimage.io.imshow(im_3d[:,:,0])
 for i in range(N_im):
     # idle_prosessing()
-    skimage.io.imshow(im_3d[:,:,i])
+    imm.set_data(im_3d[:,:,i])
     plt.title(f"Frame {i+1}")
     plt.pause(1/24)
-    plt.clf()
 
 plt.close()
 
