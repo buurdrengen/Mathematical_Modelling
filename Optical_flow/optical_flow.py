@@ -2,54 +2,103 @@
 import matplotlib.pyplot as plt
 import os
 import skimage
-from skimage import io, color
+#from skimage import io, color
 import scipy
 from scipy import ndimage
 import numpy as np
 
-im_3d = np.zeros((256, 256, 64))
-for i, image_location in enumerate(np.sort(os.listdir('Optical_flow/toyProblem_F22'))):
-    image = io.imread(f"Optical_flow/toyProblem_F22/{image_location}")
-    im_gray = color.rgb2gray(image)
+
+def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient"):
+
+    # Set sensible colormap scale
+    vmin = np.min([np.min(Vy),np.min(Vx),np.min(Vt)])
+    vmax = np.max([np.max(Vy),np.max(Vx),np.max(Vt)])
+    # Account for diverging array size in Vt 
+    N_im = np.min([np.shape(Vx)[2],np.shape(Vy)[2],np.shape(Vt)[2]])
+    if N_im == 0: return None
+
+    # Set up figure parameters
+    fig, [axx,axy,axt] = plt.subplots(1, 3, figsize=(14, 4))
+    fig.suptitle(title)
+    cb_ax = fig.add_axes([0.91, 0.1, 0.02, 0.8])
+    im = axt.imshow(np.random.random((16,16)), vmin = vmin, vmax = vmax, cmap = cmap)
+    fig.colorbar(mappable=im, cax=cb_ax)
+
+    # Iterate the plot
+    for i in range(N_im):
+        axx.cla(); axy.cla(); axt.cla()
+        axx.set_title("Gradient x"); axy.set_title("Gradient y"); axt.set_title("Gradient t")
+        axx.imshow(Vx[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
+        axy.imshow(Vy[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
+        axt.imshow(Vt[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
+        plt.pause(1/FPS)
+
+    fig.clear()
+
+# ---------------------------------------------------------------
+
+"""
+Problem 1.1: Making the video
+"""
+
+# Loading all 64 images into a 3D array as grayscale
+
+image_name_list = np.sort(os.listdir('Optical_flow/toyProblem_F22'))
+N_im = np.size(image_name_list)
+im_3d = np.zeros((256, 256, N_im))
+
+for i, image_location in enumerate(image_name_list):
+    image = skimage.io.imread(f"Optical_flow/toyProblem_F22/{image_location}")
+    im_gray = skimage.color.rgb2gray(image)
     im_3d[:,:, i] = im_gray
 
+# Displaying the image sequense
+for i in range(N_im):
+    # idle_prosessing()
+    skimage.io.imshow(im_3d[:,:,i])
+    plt.title(f"Frame {i}")
+    plt.pause(1/24)
+    plt.clf()
 
-for i, image_location in enumerate(np.sort(os.listdir('Optical_flow/toyProblem_F22'))):
-    image = io.imread(f"Optical_flow/toyProblem_F22/{image_location}")
-    im_gray = color.rgb2gray(image)
 
-    """
-    Warmup: Making the video
-    """
-    # skimage.io.imshow(im_gray)
-    # plt.title(f"frame {range(64)[i]}")
 
-    # plt.pause(1/24)
-    # plt.clf()
+"""
+Problem 2.1: Low Level Gradient
+"""
 
-    """
-    Problem 2.1: low level gradient
-    """
-    Vy = im_gray[1:, :] - im_gray[:-1, :]
-    Vx = im_gray[:, 1:] - im_gray[:, :-1]
-    Vt = im_3d[:, :, 1:] - im_3d[:, :, :-1]
+# Computing Vx, Vy and Vt
+Vy = im_3d[1:, :, :] - im_3d[:-1, :, :]
+Vx = im_3d[:, 1:, :] - im_3d[:, :-1, :]
+Vt = im_3d[:, :, 1:] - im_3d[:, :, :-1]
 
-    if i < 63:
-        skimage.io.imshow(Vt[:, :, i], vmin = -1, vmax = 1)
-        plt.title(f"frame {i+1}")
+plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
 
-        plt.pause(1/24)
-        plt.clf()
+"""
+Problem 2.2: Simple Gradient Filters
+"""
 
-    Vy_prewitt = ndimage.prewitt(im_gray, axis=0)
-    Vx_prewitt = ndimage.prewitt(im_gray, axis=1)
-    #Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
-    
-    # io.imshow(Vy_prewitt)
-    # plt.title(f"frame {i}")
 
-    # plt.pause(1/24)
-    # plt.clf()
-    
+# Using the Prewitt method
 
+Vy_prewitt = ndimage.prewitt(im_3d, axis=0)
+Vx_prewitt = ndimage.prewitt(im_3d, axis=1)
+Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
+
+# Displaying the gradient
+plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Method")
+
+#----------------------------------
+
+# Using the Sobel method
+Vy_sobel = ndimage.sobel(im_3d, axis=0)
+Vx_sobel = ndimage.sobel(im_3d, axis=1)
+Vt_sobel = ndimage.sobel(im_3d, axis=2)
+
+# Displaying the gradient
+plot_3_gradients(Vx_sobel,Vy_sobel,Vt_sobel, title = "Gradient with Sobel Method")
+
+
+"""
+Problem 2.3: Gaussian Gradient Filters
+"""
 
