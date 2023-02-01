@@ -19,13 +19,13 @@ def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient")
 
     # Set up figure parameters
     fig, [axx,axy,axt] = plt.subplots(1, 3, figsize=(14, 4))
-    fig.suptitle(title)
     cb_ax = fig.add_axes([0.91, 0.1, 0.02, 0.8])
-    im = axt.imshow(np.random.random((16,16)), vmin = vmin, vmax = vmax, cmap = cmap)
+    im = axt.imshow(np.random.random((2,2)), vmin = vmin, vmax = vmax, cmap = cmap)
     fig.colorbar(mappable=im, cax=cb_ax)
 
     # Iterate the plot
     for i in range(N_im):
+        fig.suptitle(f"{title} - Frame {i+1}")
         axx.cla(); axy.cla(); axt.cla()
         axx.set_title("Gradient x"); axy.set_title("Gradient y"); axt.set_title("Gradient t")
         axx.imshow(Vx[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
@@ -33,7 +33,8 @@ def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient")
         axt.imshow(Vt[:,:,i], vmin = vmin, vmax = vmax, cmap = cmap)
         plt.pause(1/FPS)
 
-    fig.clear()
+    plt.close(fig)
+
 
 # ---------------------------------------------------------------
 
@@ -56,11 +57,11 @@ for i, image_location in enumerate(image_name_list):
 for i in range(N_im):
     # idle_prosessing()
     skimage.io.imshow(im_3d[:,:,i])
-    plt.title(f"Frame {i}")
+    plt.title(f"Frame {i+1}")
     plt.pause(1/24)
     plt.clf()
 
-
+plt.close()
 
 """
 Problem 2.1: Low Level Gradient
