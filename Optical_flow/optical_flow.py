@@ -31,7 +31,6 @@ def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient")
     # Iterate the plot
     for i in range(N_im):
         fig.suptitle(f"{title} - Frame {i+1}")
-        #axx.cla(); axy.cla(); axt.cla()
         imx.set_data(Vx[:,:,i])
         imy.set_data(Vy[:,:,i])
         imt.set_data(Vt[:,:,i])
