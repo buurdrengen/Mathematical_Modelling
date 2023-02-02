@@ -98,7 +98,7 @@ Vx_sobel = ndimage.sobel(im_3d, axis=1)
 Vt_sobel = ndimage.sobel(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_sobel,Vy_sobel,Vt_sobel, title = "Gradient with Sobel Method")
+plot_3_gradients(Vx_sobel, Vy_sobel, Vt_sobel, title = "Gradient with Sobel Method")
 
 
 """
@@ -113,5 +113,5 @@ Vx_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=1)
 Vt_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_gauss,Vy_gauss,Vt_gauss, title = "Gradient with Gaussian Kernel", FPS = 8)
+plot_3_gradients(Vx_gauss, Vy_gauss, Vt_gauss, title = "Gradient with Gaussian Kernel")
 
