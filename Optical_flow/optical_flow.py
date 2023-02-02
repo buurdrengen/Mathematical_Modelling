@@ -88,7 +88,7 @@ Vx_prewitt = ndimage.prewitt(im_3d, axis=1)
 Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Method")
+plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Filter")
 
 #----------------------------------
 
@@ -98,7 +98,7 @@ Vx_sobel = ndimage.sobel(im_3d, axis=1)
 Vt_sobel = ndimage.sobel(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_sobel, Vy_sobel, Vt_sobel, title = "Gradient with Sobel Method")
+plot_3_gradients(Vx_sobel, Vy_sobel, Vt_sobel, title = "Gradient with Sobel Filter")
 
 
 """
@@ -113,5 +113,46 @@ Vx_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=1)
 Vt_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_gauss, Vy_gauss, Vt_gauss, title = "Gradient with Gaussian Kernel")
+plot_3_gradients(Vx_gauss, Vy_gauss, Vt_gauss, title = "Gradient with Gaussian Filter")
+
+
+#Let's plot all the gradients in one plot to compare.
+test_frame = 25
+vmin = -1; vmax = 1; cmap = "seismic"
+
+imm = skimage.io.imshow(im_3d[:,:,0])
+fig, ax = plt.subplots(3, 4, figsize=(10, 8), constrained_layout=True, sharex = True, sharey=True)
+#cb_ax = fig.add_axes([0.97, 0.1, 0.01, 0.8])
+
+# Initiate the figure
+#crude gradient
+km = ax.flat[0].imshow(Vx[:,:,test_frame]/np.max(Vx[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[0].set_title("Crude Gradient")
+ax.flat[0].set_ylabel("Gardient x")
+ax.flat[4].imshow(Vy[:,:,test_frame]/np.max(Vy[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[4].set_ylabel("Gardient y")
+ax.flat[8].imshow(Vt[:,:,test_frame]/np.max(Vt[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[8].set_ylabel("Gardient t")
+
+# Prewitt Filter
+ax.flat[1].imshow(Vx_prewitt[:,:,test_frame]/np.max(Vx_prewitt[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[1].set_title("Prewitt Filter ")
+ax.flat[5].imshow(Vy_prewitt[:,:,test_frame]/np.max(Vy_prewitt[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[9].imshow(Vt_prewitt[:,:,test_frame]/np.max(Vt_prewitt[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+
+# Sobel Filter
+km = ax.flat[2].imshow(Vx_sobel[:,:,test_frame]/np.max(Vx_sobel[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[2].set_title("Sobel Filter")
+ax.flat[6].imshow(Vy_sobel[:,:,test_frame]/np.max(Vy_sobel[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[10].imshow(Vt_sobel[:,:,test_frame]/np.max(Vt_sobel[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+
+# Gaussian Filter
+km = ax.flat[3].imshow(Vx_gauss[:,:,test_frame]/np.max(Vx_gauss[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[3].set_title("Gaussian Filter")
+ax.flat[7].imshow(Vy_gauss[:,:,test_frame]/np.max(Vy_gauss[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+ax.flat[11].imshow(Vt_gauss[:,:,test_frame]/np.max(Vt_gauss[:,:,test_frame]), vmin = vmin, vmax = vmax, cmap = cmap)
+
+#fig.colorbar(mappable=km, cax=cb_ax)
+fig.suptitle(f"Normalized Gradients - Frame {test_frame}")
+fig.savefig("Compare_gradients.png", dpi = 300, format = "png")
 
