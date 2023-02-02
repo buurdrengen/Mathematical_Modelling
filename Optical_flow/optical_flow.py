@@ -60,7 +60,6 @@ for i, image_location in enumerate(image_name_list):
 # Displaying the image sequense
 imm = skimage.io.imshow(im_3d[:,:,0])
 for i in range(N_im):
-    # idle_prosessing()
     imm.set_data(im_3d[:,:,i])
     plt.title(f"Frame {i+1}")
     plt.pause(1/24)
@@ -76,7 +75,7 @@ Vy = im_3d[1:, :, :] - im_3d[:-1, :, :]
 Vx = im_3d[:, 1:, :] - im_3d[:, :-1, :]
 Vt = im_3d[:, :, 1:] - im_3d[:, :, :-1]
 
-#plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
+plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
 
 """
 Problem 2.2: Simple Gradient Filters
@@ -90,7 +89,7 @@ Vx_prewitt = ndimage.prewitt(im_3d, axis=1)
 Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
 
 # Displaying the gradient
-#plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Method")
+plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Method")
 
 #----------------------------------
 
@@ -100,7 +99,7 @@ Vx_sobel = ndimage.sobel(im_3d, axis=1)
 Vt_sobel = ndimage.sobel(im_3d, axis=2)
 
 # Displaying the gradient
-#plot_3_gradients(Vx_sobel,Vy_sobel,Vt_sobel, title = "Gradient with Sobel Method")
+plot_3_gradients(Vx_sobel,Vy_sobel,Vt_sobel, title = "Gradient with Sobel Method")
 
 
 """
