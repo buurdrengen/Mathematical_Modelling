@@ -76,7 +76,7 @@ Vy = im_3d[1:, :, :] - im_3d[:-1, :, :]
 Vx = im_3d[:, 1:, :] - im_3d[:, :-1, :]
 Vt = im_3d[:, :, 1:] - im_3d[:, :, :-1]
 
-plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
+#plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
 
 """
 Problem 2.2: Simple Gradient Filters
@@ -90,7 +90,7 @@ Vx_prewitt = ndimage.prewitt(im_3d, axis=1)
 Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Method")
+#plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Method")
 
 #----------------------------------
 
@@ -100,10 +100,20 @@ Vx_sobel = ndimage.sobel(im_3d, axis=1)
 Vt_sobel = ndimage.sobel(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_sobel,Vy_sobel,Vt_sobel, title = "Gradient with Sobel Method")
+#plot_3_gradients(Vx_sobel,Vy_sobel,Vt_sobel, title = "Gradient with Sobel Method")
 
 
 """
 Problem 2.3: Gaussian Gradient Filters
 """
+# Using the Gaussian Kernel
+
+sigma = 1
+
+Vy_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=0)
+Vx_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=1)
+Vt_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=2)
+
+# Displaying the gradient
+plot_3_gradients(Vx_gauss,Vy_gauss,Vt_gauss, title = "Gradient with Gaussian Kernel", FPS = 8)
 
