@@ -47,6 +47,12 @@ Problem 1.1: Making the video
 
 # Loading all 64 images into a 3D array as grayscale
 
+
+path = os.getcwd()
+if path[path.rfind("/")+1:] == "Optical_flow":
+    new_path = path[:path.rfind("/")]
+    os.chdir(new_path)
+
 image_name_list = np.sort(os.listdir('Optical_flow/toyProblem_F22'))
 N_im = np.size(image_name_list)
 im_3d = np.zeros((256, 256, N_im))
