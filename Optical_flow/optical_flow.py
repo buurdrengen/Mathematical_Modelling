@@ -6,6 +6,7 @@ import skimage
 import scipy
 from scipy import ndimage
 import numpy as np
+import time
 
 
 def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient"):
@@ -35,7 +36,6 @@ def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient")
         imy.set_data(Vy[:,:,i])
         imt.set_data(Vt[:,:,i])
         plt.pause(1/FPS)
-
     plt.close(fig)
 
 
@@ -46,12 +46,6 @@ Problem 1.1: Making the video
 """
 
 # Loading all 64 images into a 3D array as grayscale
-
-
-path = os.getcwd()
-if path[path.rfind("/")+1:] == "Optical_flow":
-    new_path = path[:path.rfind("/")]
-    os.chdir(new_path)
 
 image_name_list = np.sort(os.listdir('Optical_flow/toyProblem_F22'))
 N_im = np.size(image_name_list)
@@ -66,8 +60,8 @@ for i, image_location in enumerate(image_name_list):
 imm = skimage.io.imshow(im_3d[:,:,0])
 for i in range(N_im):
     imm.set_data(im_3d[:,:,i])
-    plt.title(f"Frame {i+1}")
-    plt.pause(1/24)
+    # plt.title(f"Frame {i+1}")
+    # plt.pause(1/24)
 
 plt.close()
 
@@ -80,7 +74,8 @@ Vy = im_3d[1:, :, :] - im_3d[:-1, :, :]
 Vx = im_3d[:, 1:, :] - im_3d[:, :-1, :]
 Vt = im_3d[:, :, 1:] - im_3d[:, :, :-1]
 
-plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
+# plot_3_gradients(Vx, Vy, Vt, title = "Crude Gradient")
+
 
 """
 Problem 2.2: Simple Gradient Filters
@@ -94,7 +89,7 @@ Vx_prewitt = ndimage.prewitt(im_3d, axis=1)
 Vt_prewitt = ndimage.prewitt(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Filter")
+# plot_3_gradients(Vx_prewitt, Vy_prewitt, Vt_prewitt, title = "Gradient with Prewitt Filter")
 
 #----------------------------------
 
@@ -104,7 +99,7 @@ Vx_sobel = ndimage.sobel(im_3d, axis=1)
 Vt_sobel = ndimage.sobel(im_3d, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_sobel, Vy_sobel, Vt_sobel, title = "Gradient with Sobel Filter")
+# plot_3_gradients(Vx_sobel, Vy_sobel, Vt_sobel, title = "Gradient with Sobel Filter")
 
 
 """
@@ -119,7 +114,7 @@ Vx_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=1)
 Vt_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=2)
 
 # Displaying the gradient
-plot_3_gradients(Vx_gauss, Vy_gauss, Vt_gauss, title = "Gradient with Gaussian Filter")
+# plot_3_gradients(Vx_gauss, Vy_gauss, Vt_gauss, title = "Gradient with Gaussian Filter")
 
 
 #Let's plot all the gradients in one plot to compare.
@@ -161,4 +156,90 @@ ax.flat[11].imshow(Vt_gauss[:,:,test_frame]/np.max(Vt_gauss[:,:,test_frame]), vm
 #fig.colorbar(mappable=km, cax=cb_ax)
 fig.suptitle(f"Normalized Gradients - Frame {test_frame}")
 fig.savefig("Compare_gradients.png", dpi = 300, format = "png")
+
+
+"""
+Problem 3.1
+"""
+N = 3 # N has to be uneven because of the r definition below
+r = int((N-1)/2)
+x0=100; y0=100; t0 = 30
+
+# print(np.shape(Vy_prewitt))
+Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+Vx_p = Vx_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+Vt_p = Vt_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+A = np.stack((Vy_p, Vx_p))
+
+sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
+print(sol[0])
+
+
+"""
+Problem 3.2
+"""
+
+# pos = np.mgrid[r:256-r, r:256-r]
+# x_list = pos[0,:,:].flatten()
+# y_list = pos[1,:,:].flatten()
+
+# vector_field = np.zeros(np.shape(pos))
+# start = time.time()
+# for i in range(np.size(x_list)):
+#     N = 7 # N has to be uneven because of the r definition below
+#     r = int((N-1)/2)
+#     x0=x_list[i]; y0=y_list[i]; t0 = 30
+
+#     # print(np.shape(Vy_prewitt))
+#     Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+#     Vx_p = Vx_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+#     Vt_p = Vt_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+#     A = np.stack((Vy_p, Vx_p))
+
+#     sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
+#     vector_field[0, x0-1, y0-1] = sol[0][0]
+#     vector_field[1, x0-1, y0-1] = sol[0][1]
+# print(f"There passed {np.round((time.time()-start), 3)} seconds")
+
+# plt.close()
+# plt.figure()
+# plt.imshow(im_3d[:,:,30], cmap = 'gray') 
+# plt.quiver(pos[0,::10,::10], pos[1,::10,::10], vector_field[0,::10,::10], vector_field[1,::10,::10])
+# plt.show()
+
+
+########### GIF in 3.2
+N = 7 # N has to be uneven because of the r definition below
+r = int((N-1)/2)
+
+pos = np.mgrid[r:256-r, r:256-r, 0:64]
+x_list = pos[0].flatten()
+y_list = pos[1].flatten()
+t_list = pos[2].flatten()
+
+vector_field = np.zeros((2,256-2*r, 256-2*r, 64))
+start = time.time()
+for i in range(np.size(x_list)):
+    x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
+
+    Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    Vx_p = Vx_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    Vt_p = Vt_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    A = np.stack((Vy_p, Vx_p))
+
+    sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
+    vector_field[0, x0-r, y0-r, t0] = sol[0][0]
+    vector_field[1, x0-r, y0-r, t0] = sol[0][1]
+print(f"There passed {np.round((time.time()-start), 3)} seconds")
+
+print(np.shape(pos))
+
+fig, ax = plt.subplots(1, 1, figsize=(14, 4))
+background_im = ax.imshow(im_3d[:,:,0], cmap = 'gray') 
+opt_flow = ax.quiver(pos[0,::10,::10, 0], pos[1,::10,::10, 0], vector_field[0,::10,::10, 0], vector_field[1,::10,::10, 0])
+for i in range(64):
+    fig.suptitle(f"Optical Flow - Frame {i+1}")
+    background_im.set_data(im_3d[:,:,i])
+    opt_flow.set_data(pos[0,::10,::10, i], pos[1,::10,::10, i], vector_field[0,::10,::10, i], vector_field[1,::10,::10, i])
+    plt.pause(1/24)
 
