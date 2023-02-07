@@ -161,18 +161,18 @@ fig.savefig("Compare_gradients.png", dpi = 300, format = "png")
 """
 Problem 3.1
 """
-N = 3 # N has to be uneven because of the r definition below
-r = int((N-1)/2)
-x0=100; y0=100; t0 = 30
+# N = 3 # N has to be uneven because of the r definition below
+# r = int((N-1)/2)
+# x0=100; y0=100; t0 = 30
 
-# print(np.shape(Vy_prewitt))
-Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-Vx_p = Vx_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-Vt_p = Vt_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-A = np.stack((Vy_p, Vx_p))
+# # print(np.shape(Vy_prewitt))
+# Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+# Vx_p = Vx_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+# Vt_p = Vt_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+# A = np.stack((Vy_p, Vx_p))
 
-sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
-print(sol[0])
+# sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
+# print(sol[0])
 
 
 """
