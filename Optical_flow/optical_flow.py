@@ -211,13 +211,13 @@ Problem 3.2
 ########### GIF in 3.2
 N = 7 # N has to be uneven because of the r definition below
 r = int((N-1)/2)
-
-pos = np.mgrid[r:256-r, r:256-r, 0:64]
+tmax = 5
+pos = np.mgrid[r:256-r, r:256-r, 0:tmax]
 x_list = pos[0].flatten()
 y_list = pos[1].flatten()
 t_list = pos[2].flatten()
 
-vector_field = np.zeros((2,256-2*r, 256-2*r, 64))
+vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 start = time.time()
 for i in range(np.size(x_list)):
     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
@@ -234,12 +234,17 @@ print(f"There passed {np.round((time.time()-start), 3)} seconds")
 
 print(np.shape(pos))
 
-fig, ax = plt.subplots(1, 1, figsize=(14, 4))
-background_im = ax.imshow(im_3d[:,:,0], cmap = 'gray') 
-opt_flow = ax.quiver(pos[0,::10,::10, 0], pos[1,::10,::10, 0], vector_field[0,::10,::10, 0], vector_field[1,::10,::10, 0])
-for i in range(64):
-    fig.suptitle(f"Optical Flow - Frame {i+1}")
-    background_im.set_data(im_3d[:,:,i])
-    opt_flow.set_data(pos[0,::10,::10, i], pos[1,::10,::10, i], vector_field[0,::10,::10, i], vector_field[1,::10,::10, i])
-    plt.pause(1/24)
+plt.close()
+plt.show()
+plt.close()
 
+fig, ax = plt.subplots(1, 1, figsize=(14, 4))
+# background_im = ax.imshow(im_3d[:,:,0], cmap = 'gray') 
+# opt_flow = ax.quiver(pos[0,::10,::10, 0], pos[1,::10,::10, 0], vector_field[0,::10,::10, 0], vector_field[1,::10,::10, 0])
+for i in range(tmax):
+    fig.suptitle(f"Optical Flow - Frame {i+1}")
+    ax.imshow(im_3d[:,:,i], cmap = 'gray') 
+    opt_flow = ax.quiver(pos[0,::10,::10, i], pos[1,::10,::10, i], vector_field[0,::10,::10, i], vector_field[1,::10,::10, i])
+    plt.pause(1/2)
+    plt.cla()
+plt.savefig('ex3_2.gif')
