@@ -46,6 +46,8 @@ Problem 1.1: Making the video
 
 # Loading all 64 images into a 3D array as grayscale
 
+print(" Loading Files...", end="\r")
+
 image_name_list = np.sort(os.listdir('Optical_flow/toyProblem_F22'))
 N_im = np.size(image_name_list)
 im_3d = np.zeros((256, 256, N_im))
@@ -67,6 +69,8 @@ plt.close()
 """
 Problem 2.1: Low Level Gradient
 """
+
+print(" Computing gradients... ", end="\r")
 
 # Computing Vx, Vy and Vt
 Vy = im_3d[1:, :, :] - im_3d[:-1, :, :]
@@ -218,8 +222,10 @@ t_list = pos[2].flatten()
 
 vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 start = time.time()
+
+print("Computing flow...      ")
 for i in range(np.size(x_list)):
-    if i%2e5 == 0: print(f"Iteration {np.round(i*1e-6,1)} million")
+    if i%1e4 == 0: print(f" Operations: {np.round(i*1e-6,2)} million ", end="\r")
     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
 
     Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
@@ -231,7 +237,7 @@ for i in range(np.size(x_list)):
     vector_field[0, x0-r, y0-r, t0] = sol[0][0]
     vector_field[1, x0-r, y0-r, t0] = sol[0][1]
 
-print(f"There passed {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
+print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
 
 
 
