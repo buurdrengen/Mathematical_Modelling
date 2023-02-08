@@ -268,5 +268,5 @@ for i in range(tmax):
     # It seems to be invereted...
     #ax.arrow(10,100,50,50)
     plt.pause(1/2)
-    plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 100)
+    plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 120)
     plt.cla()
