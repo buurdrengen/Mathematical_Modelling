@@ -107,7 +107,7 @@ Problem 2.3: Gaussian Gradient Filters
 """
 # Using the Gaussian Kernel
 
-sigma = 1
+sigma = 2
 
 Vy_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=0)
 Vx_gauss = ndimage.gaussian_filter1d(im_3d, sigma=sigma, order = 1, axis=1)
@@ -209,9 +209,9 @@ Problem 3.2
 
 
 ########### GIF in 3.2
-N = 7 # N has to be uneven because of the r definition below
+N = 9 # N has to be uneven because of the r definition below
 r = int((N-1)/2)
-tmax = 5
+tmax = 64
 pos = np.mgrid[r:256-r, r:256-r, 0:tmax]
 x_list = pos[0].flatten()
 y_list = pos[1].flatten()
@@ -220,6 +220,7 @@ t_list = pos[2].flatten()
 vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 start = time.time()
 for i in range(np.size(x_list)):
+    if i%5e5 == 0: print(f"Iteration {i*1e-6} million")
     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
 
     Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
@@ -230,9 +231,11 @@ for i in range(np.size(x_list)):
     sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
     vector_field[0, x0-r, y0-r, t0] = sol[0][0]
     vector_field[1, x0-r, y0-r, t0] = sol[0][1]
-print(f"There passed {np.round((time.time()-start), 3)} seconds")
+print(f"There passed {time.strftime('%M minutes and %S seconds', time.gmtime(time.time()-start))}")
 
-print(np.shape(pos))
+
+
+#print(np.shape(pos))
 
 plt.close()
 plt.show()
@@ -246,5 +249,5 @@ for i in range(tmax):
     ax.imshow(im_3d[:,:,i], cmap = 'gray') 
     opt_flow = ax.quiver(pos[0,::10,::10, i], pos[1,::10,::10, i], vector_field[0,::10,::10, i], vector_field[1,::10,::10, i])
     plt.pause(1/2)
+    plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 300)
     plt.cla()
-plt.savefig('ex3_2.gif')
