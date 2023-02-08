@@ -3,8 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import skimage
 #from skimage import io, color
-import scipy
-from scipy import ndimage
+from scipy import ndimage, signal
 import numpy as np
 import time
 
@@ -211,7 +210,7 @@ Problem 3.2
 ########### GIF in 3.2
 N = 9 # N has to be uneven because of the r definition below
 r = int((N-1)/2)
-tmax = 64
+tmax = N_im
 pos = np.mgrid[r:256-r, r:256-r, 0:tmax]
 x_list = pos[0].flatten()
 y_list = pos[1].flatten()
@@ -220,18 +219,19 @@ t_list = pos[2].flatten()
 vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 start = time.time()
 for i in range(np.size(x_list)):
-    if i%5e5 == 0: print(f"Iteration {i*1e-6} million")
+    if i%2e5 == 0: print(f"Iteration {np.round(i*1e-6,1)} million")
     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
 
-    Vy_p = Vy_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-    Vx_p = Vx_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-    Vt_p = Vt_prewitt[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-    A = np.stack((Vy_p, Vx_p))
+    Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    Vx_p = Vx_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    Vt_p = Vt_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    A = np.stack((Vx_p, Vy_p))
 
     sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
     vector_field[0, x0-r, y0-r, t0] = sol[0][0]
     vector_field[1, x0-r, y0-r, t0] = sol[0][1]
-print(f"There passed {time.strftime('%M minutes and %S seconds', time.gmtime(time.time()-start))}")
+
+print(f"There passed {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
 
 
 
@@ -241,13 +241,32 @@ plt.close()
 plt.show()
 plt.close()
 
-fig, ax = plt.subplots(1, 1, figsize=(14, 4))
+N_a = 5 # This is the distance in pixels between each quiver arrow
+average_filter =  np.ones([N_a, N_a])/(N_a**2)
+
+fig, ax = plt.subplots(1, 1, figsize=(6, 6))
 # background_im = ax.imshow(im_3d[:,:,0], cmap = 'gray') 
 # opt_flow = ax.quiver(pos[0,::10,::10, 0], pos[1,::10,::10, 0], vector_field[0,::10,::10, 0], vector_field[1,::10,::10, 0])
+
 for i in range(tmax):
+
+    # Lets try to average the vector field
+    quiver_field_x = signal.convolve2d(vector_field[0,:,:,i], average_filter, mode = "same")
+    quiver_field_y = signal.convolve2d(vector_field[1,:,:,i], average_filter, mode = "same")
+
+    # Lets remove small values
+    amplitude_field = quiver_field_x**2 + quiver_field_y**2
+    neglect_value = 0.2
+    quiver_field_x[amplitude_field <= neglect_value] = 0
+    quiver_field_y[amplitude_field <= neglect_value] = 0
+
+    # Plot the result
     fig.suptitle(f"Optical Flow - Frame {i+1}")
     ax.imshow(im_3d[:,:,i], cmap = 'gray') 
-    opt_flow = ax.quiver(pos[0,::10,::10, i], pos[1,::10,::10, i], vector_field[0,::10,::10, i], vector_field[1,::10,::10, i])
+    opt_flow = ax.quiver(pos[0,::N_a,::N_a, i], pos[1,::N_a,::N_a, i], quiver_field_x[::N_a,::N_a], -quiver_field_y[::N_a,::N_a])
+    # Check the sign of quiver_field_y...
+    # It seems to be invereted...
+    #ax.arrow(10,100,50,50)
     plt.pause(1/2)
-    plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 300)
+    plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 100)
     plt.cla()
