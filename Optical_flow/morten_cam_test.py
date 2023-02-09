@@ -6,21 +6,27 @@ import cv2
 import time
 
 
+# Conditions
+N = 7   # Same N as other script...
+sf = 10 # Scale factor for optical flow. Lower is better but slower
+
+r = (N-1)/2
+
+# Loading camera
 cam = cv2.VideoCapture(0)
 
-testframe = np.ones((480,640)); downscaled_image_old = skimage.transform.downscale_local_mean(testframe,(10,10))
+testframe = np.ones((480,640)); downscaled_image_old = skimage.transform.downscale_local_mean(testframe,(sf,sf))
 fig = plt.figure(figsize=(12,9))
 ax = plt.imshow(testframe, figure=fig, cmap="gray", vmin = 0, vmax = 1)
 fig.suptitle("Camera")
 
 N_im = 1000
 
-pos = np.mgrid[0:640:10,0:480:10]
-vector_field = np.zeros((2,640//10,480//10))
-x_list = pos[0].flatten()//10
-y_list = pos[1].flatten()//10
+pos = np.mgrid[0:640:sf,0:480:sf]
+vector_field = np.zeros((2,640//sf,480//sf))
+x_list = pos[0].flatten()//sf
+y_list = pos[1].flatten()//sf
 
-r = 3
 
 opt_flow = plt.quiver(pos[0], pos[1], vector_field[0], -vector_field[1], figure = fig, color="blue")
 
@@ -32,7 +38,7 @@ for i in range(N_im):
         break
     
     img = skimage.color.rgb2gray(frame)
-    downscaled_image = skimage.transform.downscale_local_mean(img,(10,10))
+    downscaled_image = skimage.transform.downscale_local_mean(img,(sf,sf))
     Vy = ndimage.sobel(downscaled_image, axis=0)
     Vx = ndimage.sobel(downscaled_image, axis=1)
     Vt = downscaled_image - downscaled_image_old
