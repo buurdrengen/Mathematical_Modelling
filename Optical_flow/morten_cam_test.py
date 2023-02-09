@@ -8,12 +8,15 @@ import time
 
 # Conditions
 N = 7   # Same N as other script...
-sf = 10 # Scale factor for optical flow. Lower is better but slower
+sf = 20 # Scale factor for optical flow. Lower is better but slower
 
-r = (N-1)/2
+amplifier = 10 # Enlargement of vector arrows
+
+r = (N-1)//2
 
 # Loading camera
 cam = cv2.VideoCapture(0)
+
 
 testframe = np.ones((480,640)); downscaled_image_old = skimage.transform.downscale_local_mean(testframe,(sf,sf))
 fig = plt.figure(figsize=(12,9))
@@ -29,6 +32,8 @@ y_list = pos[1].flatten()//sf
 
 
 opt_flow = plt.quiver(pos[0], pos[1], vector_field[0], -vector_field[1], figure = fig, color="blue")
+plt.show(block = False)
+plt.pause(1)
 
 for i in range(N_im):
     start = time.time()
@@ -56,16 +61,16 @@ for i in range(N_im):
         vector_field[1, x0, y0] = sol[0][1]
 
     
-    # Lets remove small values
-    amplitude_field = vector_field[0]**2 + vector_field[1]**2
-    neglect_value = 0.1
-    vector_field[0][amplitude_field <= neglect_value] = 0
-    vector_field[1][amplitude_field <= neglect_value] = 0
+    # # Lets remove small values
+    # amplitude_field = vector_field[0]**2 + vector_field[1]**2
+    # neglect_value = 0
+    # vector_field[0][amplitude_field <= neglect_value] = 0
+    # vector_field[1][amplitude_field <= neglect_value] = 0
 
     # Update Plot
     ax.set_data(img)
-    opt_flow.set_UVC(vector_field[0], -vector_field[1])
-    plt.pause(0.05)
+    opt_flow.set_UVC(-vector_field[1]*amplifier, -vector_field[0]*amplifier)
+    plt.draw()
     downscaled_image_old = downscaled_image
     print(f"_Frametime: {int(np.ceil(1000*(time.time() - start)))}ms", end="\r")
 
