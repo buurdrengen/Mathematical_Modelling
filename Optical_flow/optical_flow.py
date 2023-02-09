@@ -47,6 +47,7 @@ Problem 1.1: Making the video
 # Loading all 64 images into a 3D array as grayscale
 
 print(" Loading Files...", end="\r")
+start = time.time()
 
 image_name_list = np.sort(os.listdir('Optical_flow/toyProblem_F22'))
 N_im = np.size(image_name_list)
@@ -221,7 +222,7 @@ y_list = pos[1].flatten()
 t_list = pos[2].flatten()
 
 vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
-start = time.time()
+
 
 print("Computing flow...      ")
 for i in range(np.size(x_list)):
@@ -243,16 +244,14 @@ print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time
 
 #print(np.shape(pos))
 
-plt.close()
-plt.show()
-plt.close()
-
 N_a = 5 # This is the distance in pixels between each quiver arrow
 average_filter =  np.ones([N_a, N_a])/(N_a**2)
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-# background_im = ax.imshow(im_3d[:,:,0], cmap = 'gray') 
-# opt_flow = ax.quiver(pos[0,::10,::10, 0], pos[1,::10,::10, 0], vector_field[0,::10,::10, 0], vector_field[1,::10,::10, 0])
+# Initialize the plot
+ax1 = plt.figure(figsize = (6,6))
+background = plt.imshow(im_3d[:,:,0], cmap = 'gray')
+opt_flow = plt.quiver(pos[0,::N_a,::N_a, 0], pos[1,::N_a,::N_a, 0], vector_field[0,::N_a,::N_a, 0], -vector_field[1,::N_a,::N_a, 0], figure = ax1)
+plt.pause(1)
 
 for i in range(tmax):
 
@@ -267,12 +266,12 @@ for i in range(tmax):
     quiver_field_y[amplitude_field <= neglect_value] = 0
 
     # Plot the result
-    fig.suptitle(f"Optical Flow - Frame {i+1}")
-    ax.imshow(im_3d[:,:,i], cmap = 'gray') 
-    opt_flow = ax.quiver(pos[0,::N_a,::N_a, i], pos[1,::N_a,::N_a, i], quiver_field_x[::N_a,::N_a], -quiver_field_y[::N_a,::N_a])
+    ax1.suptitle(f"Optical Flow - Frame {i+1}")
+    background.set_data(im_3d[:,:,i])
+    opt_flow.set_UVC(quiver_field_x[::N_a,::N_a], -quiver_field_y[::N_a,::N_a])
     # Check the sign of quiver_field_y...
     # It seems to be invereted...
     #ax.arrow(10,100,50,50)
-    plt.pause(1/2)
+
+    plt.pause(1/10)
     plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 120)
-    plt.cla()
