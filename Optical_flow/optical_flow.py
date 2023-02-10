@@ -226,7 +226,7 @@ vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 
 print("Computing flow...      ")
 for i in range(np.size(x_list)):
-    if i%1e4 == 0: print(f" Operations: {np.round(i*1e-6,2)} million ", end="\r")
+    if i%1e4 == 0: print(f" Operations: {np.int(i*1e-6,2)} million ", end="\r")
     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
 
     Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()

@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 from scipy import ndimage
 import cv2
 import time
+from tensor_solve import *
 
 
 # Conditions
-N = 3   # Same N as other script...
-sf = 10 # Scale factor for optical flow. Lower is better but slower
+N = 5   # Same N as other script...
+sf = 5 # Scale factor for optical flow. Lower is better but slower
 
 r = (N-1)//2
 
@@ -46,14 +47,20 @@ for i in range(N_im):
 
     Vy = ndimage.sobel(image_stack, axis=0)[1,:,:]
     Vx = ndimage.sobel(image_stack, axis=1)[1,:,:]
-    Vt = ndimage.sobel(image_stack, axis=2)[1,:,:]
-    #Vt = downscaled_image - downscaled_image_old
+    #Vt = ndimage.sobel(image_stack, axis=2)[1,:,:]
+    Vt = downscaled_image - downscaled_image_old
 
     for j in range(np.size(x_list)):
+        # Try to implement np.tensordot
         x0 = x_list[j]; y0 = y_list[j]
-        Vx_p = Vx[y0-r:y0+r+1, x0-r:x0+r+1].flatten()
-        Vy_p = Vy[y0-r:y0+r+1, x0-r:x0+r+1].flatten()
-        Vt_p = Vt[y0-r:y0+r+1, x0-r:x0+r+1].flatten()
+        u1 = x0-r; u2 = x0+r+1; 
+        v1 = y0-r; v2 = y0+r+1
+        if u1 == 0: u1 = None
+        if v1 == 0: v1 = None
+
+        Vx_p = Vx[v1:v2, u1:u2].flatten()
+        Vy_p = Vy[v1:v2, u1:u2].flatten()
+        Vt_p = Vt[v1:v2, u1:u2].flatten()
 
         A = np.stack((Vx_p,Vy_p))
 
