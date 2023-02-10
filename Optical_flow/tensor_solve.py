@@ -7,20 +7,20 @@ def tensor_solve(Vx,Vy,Vt, N = 3):
     """
     # Assume N = 3
 
-    r = (N-1)//2
+    r = (N-1)//2; d = 2*r
     (n,m) = np.shape(Vx)
 
-    si = (n-2*r)*(m-2*r); sj = N**2  # Matrix dimensions
+    si = (n-d)*(m-d); sj = N**2  # Matrix dimensions
 
     A0 = np.zeros((si,sj,2))
     b0 = np.zeros((si,sj,1))
     vector_field = np.zeros((n,m,2))
 
-    if N%2 == 0: Warning("N must be odd!"); return np.transpose(vector_field,(2,0,1))
+    if N%2 == 0: Warning("N must be odd!"); return np.transpose(vector_field,(2,1,0))
 
     for i in range(sj):
         x = i%N; y = i//N
-        u = x-(2*r); v = y-(2*r)
+        u = x-d; v = y-d
         if u == 0: u = None
         if v == 0: v = None
 
@@ -34,7 +34,7 @@ def tensor_solve(Vx,Vy,Vt, N = 3):
 
     sol = np.linalg.solve(A,-b)
 
-    vector_field[r:-r,r:-r,:] = np.reshape(sol,(n-2*r,m-2*r,2))
+    vector_field[r:-r,r:-r,:] = np.reshape(sol,(n-d,m-d,2))
     vector_field = np.transpose(vector_field,(2,1,0))
 
     return vector_field
