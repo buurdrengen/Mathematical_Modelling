@@ -39,4 +39,5 @@ def list_ports():
 
 
 if __name__ == "__main__":
+
     list_ports()
