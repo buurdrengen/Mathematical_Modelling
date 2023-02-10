@@ -40,8 +40,10 @@ def tensor_solve(Vx,Vy,Vt, N = 3):
     return vector_field
 
 
+#-------------------------------------------------------------------
+
+
 if __name__ == "__main__":
-    print("This is a tensor solver")
 
     print("Testing Linalg Solve ..")
 
