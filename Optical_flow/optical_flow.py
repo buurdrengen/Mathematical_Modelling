@@ -6,6 +6,7 @@ import skimage
 from scipy import ndimage, signal
 import numpy as np
 import time
+from tensor_solve import *
 
 
 def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient"):
@@ -217,26 +218,31 @@ N = 9 # N has to be uneven because of the r definition below
 r = int((N-1)/2)
 tmax = N_im
 pos = np.mgrid[r:256-r, r:256-r, 0:tmax]
-x_list = pos[0].flatten()
-y_list = pos[1].flatten()
-t_list = pos[2].flatten()
+# x_list = pos[0].flatten()
+# y_list = pos[1].flatten()
+# t_list = pos[2].flatten()
 
 vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 
 
 print("Computing flow...      ")
-for i in range(np.size(x_list)):
-    if i%1e4 == 0: print(f" Operations: {np.int(i*1e-6,2)} million ", end="\r")
-    x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
 
-    Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-    Vx_p = Vx_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-    Vt_p = Vt_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-    A = np.stack((Vx_p, Vy_p))
+for i in range(tmax):
+    vector_field[:, :, :, i] = tensor_solve(Vx = Vx_prewitt[:,:,i], Vy = Vy_prewitt[:,:,i], Vt = Vt_prewitt[:,:,i], N = N)[:, r:-r, r:-r]
 
-    sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
-    vector_field[0, x0-r, y0-r, t0] = sol[0][0]
-    vector_field[1, x0-r, y0-r, t0] = sol[0][1]
+
+# for i in range(np.size(x_list)):
+#     if i%1e4 == 0: print(f" Operations: {np.round(i*1e-6,2)} million ", end="\r")
+#     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
+
+#     Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+#     Vx_p = Vx_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+#     Vt_p = Vt_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+#     A = np.stack((Vx_p, Vy_p))
+
+#     sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
+#     vector_field[0, x0-r, y0-r, t0] = sol[0][0]
+#     vector_field[1, x0-r, y0-r, t0] = sol[0][1]
 
 print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
 
@@ -244,8 +250,8 @@ print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time
 
 #print(np.shape(pos))
 
-N_a = 5 # This is the distance in pixels between each quiver arrow
-average_filter =  np.ones([N_a, N_a])/(N_a**2)
+N_a = 7 # This is the distance in pixels between each quiver arrow
+average_filter =  np.ones([3, 3])/(9)
 
 # Initialize the plot
 ax1 = plt.figure(figsize = (6,6))
@@ -261,7 +267,7 @@ for i in range(tmax):
 
     # Lets remove small values
     amplitude_field = quiver_field_x**2 + quiver_field_y**2
-    neglect_value = 0.2
+    neglect_value = 0.15
     quiver_field_x[amplitude_field <= neglect_value] = 0
     quiver_field_y[amplitude_field <= neglect_value] = 0
 
@@ -274,4 +280,4 @@ for i in range(tmax):
     #ax.arrow(10,100,50,50)
 
     plt.pause(1/10)
-    plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 120)
+    #plt.savefig(f'Optical_flow/toyOpticalFlow/image_flow_{i}.png', dpi = 120)
