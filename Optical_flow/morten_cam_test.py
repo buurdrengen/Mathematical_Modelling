@@ -9,29 +9,33 @@ from tensor_solve import *
 
 # Conditions
 N = 5   # Same N as other script...
-sf = 5 # Scale factor for optical flow. Lower is better but slower
+scale_factor = 4 # Scale factor for optical flow. Lower is better but slower
+
+N_a = 4 # Distance between arrows
 
 r = (N-1)//2
 
 # Loading camera
 cam = cv2.VideoCapture(0)
 
+w = int(cam.get(3))
+h = int(cam.get(4))
 
-test_frame = np.random.rand(480,640,3); frame = np.copy(test_frame[:,:,0]); downscaled_image_old = skimage.transform.downscale_local_mean(frame,(sf,sf)); downscaled_image_new = np.copy(downscaled_image_old); downscaled_image = np.copy(downscaled_image_old)
-fig = plt.figure(figsize=(8,6))
-ax = plt.imshow(test_frame, figure=fig)
-fig.suptitle("Camera")
+
+test_frame = np.random.rand(h,w,3); frame = np.copy(test_frame[:,:,0]); downscaled_image_old = skimage.transform.downscale_local_mean(frame,(scale_factor,scale_factor)); downscaled_image_new = np.copy(downscaled_image_old); downscaled_image = np.copy(downscaled_image_old)
+ax = plt.figure(figsize=(8,6))
+background = plt.imshow(test_frame, figure=ax)
+ax.suptitle("Camera")
 
 N_im = 1000
 
-pos = np.mgrid[0:640:sf,0:480:sf]
-vector_field = np.ones((2,640//sf,480//sf))
-x_list = pos[0].flatten()//sf
-y_list = pos[1].flatten()//sf
+pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
+vector_field = np.ones((2,h//scale_factor,w//scale_factor))
 
 ret, frame = cam.read()
 
-opt_flow = plt.quiver(pos[0], pos[1], vector_field[0], vector_field[1], figure = fig, scale = 20)
+opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a], figure = ax)
+
 
 for i in range(N_im):
     start = time.time()
@@ -41,43 +45,46 @@ for i in range(N_im):
         break
     
     img = skimage.color.rgb2gray(new_frame)
-    downscaled_image_new = skimage.transform.downscale_local_mean(img,(sf,sf))
+    downscaled_image_new = skimage.transform.downscale_local_mean(img,(scale_factor,scale_factor))
 
     image_stack = np.stack((downscaled_image_old, downscaled_image, downscaled_image_new))
+    # Shape: (3,y,x)
+    Vy = ndimage.prewitt(image_stack, axis=1)[1,:,:]
+    Vx = ndimage.prewitt(image_stack, axis=2)[1,:,:]
+    Vt = ndimage.prewitt(image_stack, axis=0)[1,:,:]
+    #Vt = np.copy(downscaled_image - downscaled_image_old)
 
-    Vy = ndimage.sobel(image_stack, axis=0)[1,:,:]
-    Vx = ndimage.sobel(image_stack, axis=1)[1,:,:]
-    #Vt = ndimage.sobel(image_stack, axis=2)[1,:,:]
-    Vt = downscaled_image - downscaled_image_old
 
-    for j in range(np.size(x_list)):
-        # Try to implement np.tensordot
-        x0 = x_list[j]; y0 = y_list[j]
-        u1 = x0-r; u2 = x0+r+1; 
-        v1 = y0-r; v2 = y0+r+1
-        if u1 == 0: u1 = None
-        if v1 == 0: v1 = None
+    vector_field[:,:,:] = tensor_solve(Vx = Vx, Vy = Vy, Vt = Vt, N = N)
+    #print(tensor_solve(Vx = Vx.T, Vy = Vy.T, Vt = Vt.T, N = N))
+    # for j in range(np.size(x_list)):
+    #     # Try to implement np.tensordot
+    #     x0 = x_list[j]; y0 = y_list[j]
+    #     u1 = x0-r; u2 = x0+r+1; 
+    #     v1 = y0-r; v2 = y0+r+1
+    #     if u1 == 0: u1 = None
+    #     if v1 == 0: v1 = None
 
-        Vx_p = Vx[v1:v2, u1:u2].flatten()
-        Vy_p = Vy[v1:v2, u1:u2].flatten()
-        Vt_p = Vt[v1:v2, u1:u2].flatten()
+    #     Vx_p = Vx[v1:v2, u1:u2].flatten()
+    #     Vy_p = Vy[v1:v2, u1:u2].flatten()
+    #     Vt_p = Vt[v1:v2, u1:u2].flatten()
 
-        A = np.stack((Vx_p,Vy_p))
+    #     A = np.stack((Vx_p,Vy_p))
 
-        sol = np.linalg.lstsq(A.T, -Vt_p, rcond=None)
-        vector_field[0, x0, y0] = sol[0][0]
-        vector_field[1, x0, y0] = sol[0][1]
+    #     sol = np.linalg.lstsq(A.T, -Vt_p, rcond=None)
+    #     vector_field[0, x0, y0] = sol[0][0]
+    #     vector_field[1, x0, y0] = sol[0][1]
 
     
     # Lets remove small values
-    amplitude_field = vector_field[0]**2 + vector_field[1]**2
-    neglect_value = 0.05
-    vector_field[0][amplitude_field <= neglect_value] = 0
-    vector_field[1][amplitude_field <= neglect_value] = 0
+    amplitude_field = vector_field[0,::N_a,::N_a]**2 + vector_field[1,::N_a,::N_a]**2
+    # neglect_value = 0.05
+    # vector_field[0,::N_a,::N_a][amplitude_field <= neglect_value] = 0
+    # vector_field[1,::N_a,::N_a][amplitude_field <= neglect_value] = 0
 
     # Update Plot
-    ax.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0], vector_field[1])
+    background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a])
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)
