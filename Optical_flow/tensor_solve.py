@@ -42,6 +42,7 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
     b = np.matmul(AT, b0)
 
     # Make sure trivial zeros does not kill the solver :)
+    # A cannot be singular, so this is fixed here
     trivial_zeros = np.argwhere(np.all(A[..., :] == 0, axis=(1,2)))
     A[trivial_zeros] = np.array([[1,1],[0,1]])
 
