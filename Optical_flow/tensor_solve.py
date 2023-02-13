@@ -20,13 +20,15 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
     Vy = np.pad(Vy,((0,k-n),(0,k-m)), mode="constant")
     Vt = np.pad(Vt,((0,k-n),(0,k-m)), mode="constant")
 
+    # Matrix dimensions
     r = (N-1)//2; d = 2*r
-    si = (k-d)**2; sj = N**2  # Matrix dimensions
+    si = (k-d)**2; sj = N**2  
 
+    # Predefinitions
     A0 = np.zeros((si,sj,2))
     b0 = np.zeros((si,sj,1))
 
-    # grab all submatrices of size (k-d) by (k-d)
+    # Grab all proper submatrices of size (k-d) by (k-d)
     for i in range(sj):
         x = i%N; y = i//N
         u = x-d; v = y-d
@@ -37,12 +39,14 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
         A0[:,i,1] = Vy[y:v,x:u].T.flatten()
         b0[:,i,0] = Vt[y:v,x:u].T.flatten()
 
-    AT = np.transpose(A0,(0,2,1))
+    
+    # All matricies in A must be square. This is done by 3D matrix multiplication
+    AT = np.transpose(A0, (0,2,1))
     A = np.matmul(AT, A0)
     b = np.matmul(AT, b0)
 
     # Make sure trivial zeros does not kill the solver :)
-    # A cannot be singular, so this is fixed here
+    # 'A' cannot be singular, so this is fixed here
     trivial_zeros = np.argwhere(np.all(A[..., :] == 0, axis=(1,2)))
     A[trivial_zeros] = np.array([[1,1],[0,1]])
 
