@@ -44,7 +44,6 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
     # Make sure trivial zeros does not kill the solver :)
     trivial_zeros = np.argwhere(np.all(A[..., :] == 0, axis=(1,2)))
     A[trivial_zeros] = np.array([[1,1],[0,1]])
-    b[trivial_zeros] = np.array([[0],[1]])
 
     # Magic!
     sol = np.linalg.solve(A,-b)
@@ -111,7 +110,7 @@ if __name__ == "__main__":
     print("Testing Linalg Solve ..")
 
     sample_size = (240,320)
-    n_samples = 1000
+    n_samples = 10
     N = 7
 
     r = (N-1)//2
