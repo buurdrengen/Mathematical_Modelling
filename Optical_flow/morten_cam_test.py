@@ -16,7 +16,7 @@ N_a = 4 # Distance between arrows
 r = (N-1)//2
 
 # Loading camera
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(4)
 
 w = int(cam.get(3))
 h = int(cam.get(4))
@@ -30,11 +30,11 @@ ax.suptitle("Camera")
 N_im = 1000
 
 pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
-vector_field = np.ones((2,h//scale_factor,w//scale_factor))
+vector_field = np.zeros((2,h//scale_factor,w//scale_factor))
 
 ret, frame = cam.read()
 
-opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a], figure = ax)
+opt_flow = plt.quiver(pos[1,r:-r:N_a,r:-r:N_a], pos[0,r:-r:N_a,r:-r:N_a], vector_field[0,r:-r:N_a,r:-r:N_a], vector_field[1,r:-r:N_a,r:-r:N_a], figure = ax)
 
 
 for i in range(N_im):
@@ -84,7 +84,7 @@ for i in range(N_im):
 
     # Update Plot
     background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a])
+    opt_flow.set_UVC(vector_field[0,r:-r:N_a,r:-r:N_a], vector_field[1,r:-r:N_a,r:-r:N_a])
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)

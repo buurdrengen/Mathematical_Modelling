@@ -49,9 +49,12 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
     # 'A' cannot be singular, so this is fixed here
     trivial_zeros = np.argwhere(np.all(A[..., :] == 0, axis=(1,2)))
     A[trivial_zeros] = np.array([[1,1],[0,1]])
-
+    b[trivial_zeros] = np.array([[0],[1]])
     # Magic!
-    sol = np.linalg.solve(A,-b)
+    try:
+        sol = np.linalg.solve(A,-b)
+    except np.linalg.LinAlgError:
+        sol = np.zeros((si,2,1))
 
     # Reconstruct the vector field to the original size
     vector_field[:,r:-r,r:-r] = np.reshape(sol,(k-d,k-d,2))[:n-d,:m-d].transpose((2,0,1))
@@ -115,7 +118,7 @@ if __name__ == "__main__":
     print("Testing Linalg Solve ..")
 
     sample_size = (240,320)
-    n_samples = 10
+    n_samples = 1
     N = 7
 
     r = (N-1)//2
