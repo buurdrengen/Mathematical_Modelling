@@ -228,8 +228,8 @@ vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 print("Computing flow...      ")
 
 for i in range(tmax):
-    vector_field[:, :, :, i] = tensor_solve(Vx = Vx_prewitt[:,:,i], Vy = Vy_prewitt[:,:,i], Vt = Vt_prewitt[:,:,i], N = N)[:, r:-r, r:-r]
-
+    vector_field[:, :, :, i] = new_tensor_solve(Vx = Vx_prewitt[:,:,i], Vy = Vy_prewitt[:,:,i], Vt = Vt_prewitt[:,:,i], N = N)[:, r:-r, r:-r]
+    print(f"Iteration {i}", end = "\r")
 
 # for i in range(np.size(x_list)):
 #     if i%1e4 == 0: print(f" Operations: {np.round(i*1e-6,2)} million ", end="\r")

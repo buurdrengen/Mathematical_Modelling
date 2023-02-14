@@ -16,25 +16,26 @@ N_a = 4 # Distance between arrows
 r = (N-1)//2
 
 # Loading camera
-cam = cv2.VideoCapture(4)
+cam = cv2.VideoCapture(0)
 
 w = int(cam.get(3))
 h = int(cam.get(4))
 
 
-test_frame = np.random.rand(h,w,3); frame = np.copy(test_frame[:,:,0]); downscaled_image_old = skimage.transform.downscale_local_mean(frame,(scale_factor,scale_factor)); downscaled_image_new = np.copy(downscaled_image_old); downscaled_image = np.copy(downscaled_image_old)
-ax = plt.figure(figsize=(8,6))
-background = plt.imshow(test_frame, figure=ax)
-ax.suptitle("Camera")
+test_frame = np.random.rand(h,w,3)
+frame = np.copy(test_frame[:,:,0]); downscaled_image_old = skimage.transform.downscale_local_mean(frame,(scale_factor,scale_factor)); downscaled_image_new = np.copy(downscaled_image_old); downscaled_image = np.copy(downscaled_image_old)
+fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+background = plt.imshow(test_frame)
+fig.suptitle("Camera")
 
 N_im = 1000
 
-pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
+pos = np.mgrid[h:0:-scale_factor,0:w:scale_factor]
 vector_field = np.zeros((2,h//scale_factor,w//scale_factor))
 
 ret, frame = cam.read()
 
-opt_flow = plt.quiver(pos[1,r:-r:N_a,r:-r:N_a], pos[0,r:-r:N_a,r:-r:N_a], vector_field[0,r:-r:N_a,r:-r:N_a], vector_field[1,r:-r:N_a,r:-r:N_a], figure = ax)
+opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a])
 
 
 for i in range(N_im):
@@ -55,7 +56,8 @@ for i in range(N_im):
     #Vt = np.copy(downscaled_image - downscaled_image_old)
 
 
-    vector_field[:,:,:] = tensor_solve(Vx = Vx, Vy = Vy, Vt = Vt, N = N)
+    vector_field[:,:,:] = new_tensor_solve(Vx = Vy, Vy = Vx, Vt = Vt, N = N)
+
     #print(tensor_solve(Vx = Vx.T, Vy = Vy.T, Vt = Vt.T, N = N))
     # for j in range(np.size(x_list)):
     #     # Try to implement np.tensordot
@@ -84,14 +86,14 @@ for i in range(N_im):
 
     # Update Plot
     background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0,r:-r:N_a,r:-r:N_a], vector_field[1,r:-r:N_a,r:-r:N_a])
+    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], -vector_field[1,::N_a,::N_a])
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)
     downscaled_image = np.copy(downscaled_image_new)
     frame = np.copy(new_frame)
 
-    print(f"_Frametime: {int(np.ceil(1000*(time.time() - start)))}ms, max movement: {np.round(np.sqrt(np.max(amplitude_field)),2)}                           ", end="\r")
+    print(f"_Frametime: {int(np.ceil(1000*(time.time() - start)))}ms, max movement: {np.round(np.sqrt(np.max(amplitude_field)),2)}, NZ: {(vector_field[:,:,:] == 0).sum()}                          ", end="\r")
 
 print("\nReleasing Camera")
 cam.release()

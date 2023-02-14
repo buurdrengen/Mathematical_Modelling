@@ -62,6 +62,15 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
     return vector_field
 
 
+def fake_solve(Vx, Vy, Vt, N):
+    
+    r = (N-1)//2
+    (n,m) = np.shape(Vx)
+    vector_field = np.zeros((2,n,m))
+    vector_field[:,r:-r,r:-r] = np.triu(np.ones((2,n-2*r,m-2*r)))
+
+    return vector_field
+
 #-------------------------------------------------------------------
 
 # def square_tensor_solve(Vx, Vy, Vt, N = 3):
@@ -113,13 +122,80 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
 #-------------------------------------------------------------------
 
 
+#-------------------------------------------------------------------
+
+def new_tensor_solve(Vx, Vy, Vt, N = 3):
+    """
+    Vx, Vy, and Vt must all be the same shape square numpy array
+    """
+
+    (n,m) = np.shape(Vx)
+
+    vector_field = np.zeros((2,n,m))
+
+    if (np.shape(Vy) != (n,m)) or (np.shape(Vt) != (n,m)): raise Exception("Gradients Must be the same shape!")
+    if N%2 == 0: raise Exception("N must be odd!")
+
+    # No padding nessersary :)
+    # Matrix dimensions
+    r = (N-1)//2; d = 2*r
+    si = (n-d)*(m-d); sj = N**2
+    A0 = np.zeros((si,sj,2))
+    b0 = np.zeros((si,sj,1))
+
+    # grab all submatrices of size (k-d) by (k-d)
+    for i in range(sj):
+        x = i%N; y = i//N
+        u = x-d; v = y-d
+        if u == 0: u = None
+        if v == 0: v = None
+
+        A0[:,i,0] = Vx[y:v,x:u].flatten()
+        A0[:,i,1] = Vy[y:v,x:u].flatten()
+        b0[:,i,0] = Vt[y:v,x:u].flatten()
+
+
+    # All matricies in A must be square. This is done by 3D matrix multiplication
+    AT = np.transpose(A0,(0,2,1))
+    A = np.matmul(AT, A0)
+    b = np.matmul(AT, b0)
+
+    # Make sure trivial zeros does not kill the solver :)
+    # 'A' cannot be singular, so this is fixed here
+    singular_matrix = (np.linalg.matrix_rank(A, hermitian=True) != 2)
+    A[singular_matrix] = np.array([[1,1],[0,1]])
+    b[singular_matrix] = np.array([[0],[0]])
+
+    # Magic!
+    # ATA = np.linalg.inv(A)
+    # sol2 = np.matmul(ATA,-b)
+    sol = np.linalg.solve(A,-b)
+    # sol3 = np.zeros(np.shape(sol))
+
+    # for l in range(N**2):
+    #     sls = np.linalg.solve(A[l],-np.squeeze(b[l,:,0]))
+    #     sol3[l,0] = sls[0]
+    #     sol3[l,1] = sls[1]
+
+    # print((np.round(sol,6) != np.round(sol2,6)).sum())
+    # print((np.round(sol2,6) != np.round(sol3,6)).sum())
+    # print((np.round(sol3,6) != np.round(sol,6)).sum())
+    # Reconstruct the vector field to the original size
+    vector_field[:,r:-r,r:-r] = np.reshape(sol,(n-d,m-d,2)).transpose((2,0,1))
+
+    return vector_field
+
+
+#-------------------------------------------------------------------
+
+
 if __name__ == "__main__":
 
     print("Testing Linalg Solve ..")
 
-    sample_size = (240,320)
-    n_samples = 1
-    N = 7
+    sample_size = (300,300)
+    n_samples = 10
+    N = 3
 
     r = (N-1)//2
     if n_samples >= 10:
@@ -141,7 +217,7 @@ if __name__ == "__main__":
         Vt[:,:] = np.random.rand(sample_size[0],sample_size[1])
 
         start = time.time()
-        output1 = tensor_solve(Vx, Vy, Vt, N = N)
+        output1 = new_tensor_solve(Vx, Vy, Vt, N = N)
         result1[i] = time.time() - start
 
     print("\nDone!\n")
@@ -193,7 +269,7 @@ if __name__ == "__main__":
 
     print("Comparing...")
 
-    output1 = tensor_solve(Vx, Vy, Vt, N = N)
+    output1 = new_tensor_solve(Vx, Vy, Vt, N = N)
 
     # print(np.shape(output1))
     # print(np.shape(output2))
