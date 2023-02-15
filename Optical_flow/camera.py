@@ -10,15 +10,16 @@ from tensor_solve import *
 # Conditions
 N = 5   # Same N as other script...
 scale_factor = 4 # Scale factor for optical flow. Lower is better but slower
-figsize = (8,6)
+figsize = (9,16)
 N_a = 8 # Distance between arrows
-sigma = 2
+sigma = 3
+
+image_source = "Optical_flow/Videos/Good_test_video.mp4"
 
 r = (N-1)//2
 
 # Loading camera
-# cam = cv2.VideoCapture("Good_test_video.mp4")
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(image_source)
 
 w = int(cam.get(3))
 h = int(cam.get(4))
@@ -33,7 +34,7 @@ fig, ax = plt.subplots(1, 1, figsize = figsize)
 background = plt.imshow(test_frame)
 fig.suptitle("Camera")
 
-N_im = (n_frames-1)*(n_frames > 0) + (n_frames == -1)*2000
+N_im = (n_frames-1)*(n_frames > 0) + (n_frames == -1)*100
 
 ret, frame = cam.read()
 
@@ -41,7 +42,7 @@ pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
 vector_field = np.zeros((2,h//scale_factor,w//scale_factor))
 
 
-opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a])
+opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a], vector_field[0,::N_a,::N_a], cmap = "hot")
 
 
 for i in range(N_im):
@@ -59,7 +60,10 @@ for i in range(N_im):
     Vy = ndimage.sobel(image_stack, axis=1)[1,:,:]
     Vx = ndimage.sobel(image_stack, axis=2)[1,:,:]
     Vt = ndimage.sobel(image_stack, axis=0)[1,:,:]
-    #Vt = np.copy(downscaled_image - downscaled_image_old)
+    
+    # Vy = ndimage.gaussian_filter1d(image_stack, sigma = sigma, order = 1, axis=1)[1,:,:]
+    # Vx = ndimage.gaussian_filter1d(image_stack, sigma = sigma, order = 1, axis=2)[1,:,:]
+    # Vt = ndimage.gaussian_filter1d(image_stack, sigma = sigma, order = 1, axis=0)[1,:,:]
 
 
     vector_field[:,:,:] = tensor_solve(Vx = Vx, Vy = Vy, Vt = Vt, N = N)
@@ -92,12 +96,16 @@ for i in range(N_im):
 
     # Update Plot
     background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], -vector_field[1,::N_a,::N_a])
+    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], -vector_field[1,::N_a,::N_a], amplitude_field)
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)
     downscaled_image = np.copy(downscaled_image_new)
     frame = np.copy(new_frame)
+
+
+
+    plt.savefig(f'Optical_flow/VideoFlow/GV_flow_{i}.png', dpi = 70)
 
     print(f"_Frametime: {int(np.ceil(1000*(time.time() - start)))}ms, max movement: {np.round(np.sqrt(np.max(amplitude_field)),2)}, zero-points: {(vector_field[:,:,:] == 0).sum()}                          ", end="\r")
 
