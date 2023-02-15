@@ -10,8 +10,9 @@ from tensor_solve import *
 # Conditions
 N = 5   # Same N as other script...
 scale_factor = 4 # Scale factor for optical flow. Lower is better but slower
-figsize = (9,16)
+figsize = (8,6)
 N_a = 8 # Distance between arrows
+sigma = 2
 
 r = (N-1)//2
 
@@ -32,7 +33,7 @@ fig, ax = plt.subplots(1, 1, figsize = figsize)
 background = plt.imshow(test_frame)
 fig.suptitle("Camera")
 
-N_im = (n_frames-1)*(n_frames > 0) + (n_frames == -1)*1000
+N_im = (n_frames-1)*(n_frames > 0) + (n_frames == -1)*2000
 
 ret, frame = cam.read()
 

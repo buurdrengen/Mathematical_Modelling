@@ -138,9 +138,9 @@ if __name__ == "__main__":
 
     print("Testing Linalg Solve ..")
 
-    sample_size = (300,300)
-    n_samples = 10
-    N = 3
+    sample_size = (480,640)
+    n_samples = 500
+    N = 7
 
     r = (N-1)//2
     if n_samples >= 10:
