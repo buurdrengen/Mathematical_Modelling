@@ -228,7 +228,7 @@ vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
 print("Computing flow...      ")
 
 for i in range(tmax):
-    vector_field[:, :, :, i] = new_tensor_solve(Vx = Vx_prewitt[:,:,i], Vy = Vy_prewitt[:,:,i], Vt = Vt_prewitt[:,:,i], N = N)[:, r:-r, r:-r]
+    vector_field[:, :, :, i] = tensor_solve(Vx = Vx_prewitt[:,:,i], Vy = Vy_prewitt[:,:,i], Vt = Vt_prewitt[:,:,i], N = N)[:, r:-r, r:-r]
     print(f"Iteration {i}", end = "\r")
 
 # for i in range(np.size(x_list)):
@@ -256,7 +256,7 @@ average_filter =  np.ones([3, 3])/(9)
 # Initialize the plot
 ax1 = plt.figure(figsize = (6,6))
 background = plt.imshow(im_3d[:,:,0], cmap = 'gray')
-opt_flow = plt.quiver(pos[0,::N_a,::N_a, 0], pos[1,::N_a,::N_a, 0], vector_field[0,::N_a,::N_a, 0], -vector_field[1,::N_a,::N_a, 0], figure = ax1)
+opt_flow = plt.quiver(pos[1,::N_a,::N_a, 0], pos[0,::N_a,::N_a, 0], vector_field[0,::N_a,::N_a, 0], -vector_field[1,::N_a,::N_a, 0], figure = ax1)
 plt.pause(1)
 
 for i in range(tmax):
@@ -267,10 +267,10 @@ for i in range(tmax):
 
     # Lets remove small values
     amplitude_field = quiver_field_x**2 + quiver_field_y**2
-    neglect_value = 0.15
-    quiver_field_x[amplitude_field <= neglect_value] = 0
-    quiver_field_y[amplitude_field <= neglect_value] = 0
-
+    # neglect_value = 0.15
+    # quiver_field_x[amplitude_field <= neglect_value] = 0
+    # quiver_field_y[amplitude_field <= neglect_value] = 0
+ 
     # Plot the result
     ax1.suptitle(f"Optical Flow - Frame {i+1}")
     background.set_data(im_3d[:,:,i])
