@@ -7,6 +7,7 @@ from scipy import ndimage, signal
 import numpy as np
 import time
 from tensor_solve import *
+import cv2
 
 
 def plot_3_gradients(Vx, Vy, Vt, cmap = "seismic", FPS = 24, title = "Gradient"):
@@ -46,23 +47,26 @@ Problem 1.1: Making the video
 """
 
 # Loading all 64 images into a 3D array as grayscale
+w = 640
+h = 480
 
 print(" Loading Files...", end="\r")
 start = time.time()
 
 image_name_list = np.sort(os.listdir('Optical_flow/toyProblem_F22'))
 N_im = np.size(image_name_list)
-im_3d = np.zeros((256, 256, N_im))
+im_3d = np.zeros((h, w, N_im))
+cam = cv2.VideoCapture(1)
 
 for i, image_location in enumerate(image_name_list):
-    image = skimage.io.imread(f"Optical_flow/toyProblem_F22/{image_location}")
+    _, image = cam.read()
     im_gray = skimage.color.rgb2gray(image)
     im_3d[:,:, i] = im_gray
 
 # Displaying the image sequense
 imm = skimage.io.imshow(im_3d[:,:,0])
-for i in range(N_im):
-    imm.set_data(im_3d[:,:,i])
+# for i in range(N_im):
+#     imm.set_data(im_3d[:,:,i])
     # plt.title(f"Frame {i+1}")
     # plt.pause(1/24)
 
@@ -217,12 +221,12 @@ Problem 3.2
 N = 9 # N has to be uneven because of the r definition below
 r = int((N-1)/2)
 tmax = N_im
-pos = np.mgrid[r:256-r, r:256-r, 0:tmax]
+pos = np.mgrid[r:h-r, r:w-r, 0:tmax]
 # x_list = pos[0].flatten()
 # y_list = pos[1].flatten()
 # t_list = pos[2].flatten()
 
-vector_field = np.zeros((2, 256-2*r, 256-2*r, tmax))
+vector_field = np.zeros((2, h-2*r, w-2*r, tmax))
 
 
 print("Computing flow...      ")
@@ -244,7 +248,7 @@ for i in range(tmax):
 #     vector_field[0, x0-r, y0-r, t0] = sol[0][0]
 #     vector_field[1, x0-r, y0-r, t0] = sol[0][1]
 
-print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
+# print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
 
 
 

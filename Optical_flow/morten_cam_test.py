@@ -1,6 +1,7 @@
 import numpy as np
 import skimage
 import matplotlib.pyplot as plt
+# import matplotlib.quiver
 from scipy import ndimage
 import cv2
 import time
@@ -8,7 +9,7 @@ from tensor_solve import *
 
 
 # Conditions
-N = 5   # Same N as other script...
+N = 3   # Same N as other script...
 scale_factor = 4 # Scale factor for optical flow. Lower is better but slower
 
 N_a = 4 # Distance between arrows
@@ -16,25 +17,32 @@ N_a = 4 # Distance between arrows
 r = (N-1)//2
 
 # Loading camera
-cam = cv2.VideoCapture(4)
+cam = cv2.VideoCapture(1)
 
 w = int(cam.get(3))
 h = int(cam.get(4))
+pic_size = np.min([w, h])
+
+test_frame = np.random.rand(h,w,3)
+frame = np.copy(test_frame[:,:,0])
+frame = frame[:pic_size, :pic_size]
+downscaled_image_old = skimage.transform.downscale_local_mean(frame,(scale_factor,scale_factor)) 
+downscaled_image_new = np.copy(downscaled_image_old)
+downscaled_image = np.copy(downscaled_image_old)
 
 
-test_frame = np.random.rand(h,w,3); frame = np.copy(test_frame[:,:,0]); downscaled_image_old = skimage.transform.downscale_local_mean(frame,(scale_factor,scale_factor)); downscaled_image_new = np.copy(downscaled_image_old); downscaled_image = np.copy(downscaled_image_old)
-ax = plt.figure(figsize=(8,6))
-background = plt.imshow(test_frame, figure=ax)
-ax.suptitle("Camera")
+fig, ax = plt.subplots(figsize=(8,6))
+background = ax.imshow(test_frame[:pic_size, :pic_size]) 
+fig.suptitle("Camera")
 
 N_im = 1000
 
-pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
-vector_field = np.zeros((2,h//scale_factor,w//scale_factor))
+pos = np.mgrid[0:pic_size:scale_factor,0:pic_size:scale_factor]
+vector_field = np.zeros((2,pic_size//scale_factor,pic_size//scale_factor))
 
 ret, frame = cam.read()
 
-opt_flow = plt.quiver(pos[1,r:-r:N_a,r:-r:N_a], pos[0,r:-r:N_a,r:-r:N_a], vector_field[0,r:-r:N_a,r:-r:N_a], vector_field[1,r:-r:N_a,r:-r:N_a], figure = ax)
+opt_flow = ax.quiver(pos[0,r:-r:N_a,r:-r:N_a], pos[1,r:-r:N_a,r:-r:N_a], vector_field[0,r:-r:N_a,r:-r:N_a], -vector_field[1,r:-r:N_a,r:-r:N_a])
 
 
 for i in range(N_im):
@@ -44,14 +52,15 @@ for i in range(N_im):
         print("failed to grab frame")
         break
     
-    img = skimage.color.rgb2gray(new_frame)
+    img = skimage.color.rgb2gray(new_frame)[:pic_size, :pic_size]
     downscaled_image_new = skimage.transform.downscale_local_mean(img,(scale_factor,scale_factor))
+
 
     image_stack = np.stack((downscaled_image_old, downscaled_image, downscaled_image_new))
     # Shape: (3,y,x)
     Vy = ndimage.prewitt(image_stack, axis=1)[1,:,:]
     Vx = ndimage.prewitt(image_stack, axis=2)[1,:,:]
-    Vt = ndimage.prewitt(image_stack, axis=0)[1,:,:]
+    Vt = ndimage.prewitt(image_stack, axis=0)[1,:,:] 
     #Vt = np.copy(downscaled_image - downscaled_image_old)
 
 
@@ -83,8 +92,8 @@ for i in range(N_im):
     # vector_field[1,::N_a,::N_a][amplitude_field <= neglect_value] = 0
 
     # Update Plot
-    background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0,r:-r:N_a,r:-r:N_a], vector_field[1,r:-r:N_a,r:-r:N_a])
+    background.set_data(cv2.cvtColor(frame[:pic_size, :pic_size], cv2.COLOR_BGR2RGB))
+    opt_flow.set_UVC(vector_field[0,r:-r:N_a,r:-r:N_a], -vector_field[1,r:-r:N_a,r:-r:N_a])
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)
