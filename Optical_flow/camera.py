@@ -105,7 +105,7 @@ for i in range(N_im):
 
 
 
-    plt.savefig(f'Optical_flow/VideoFlow/GV_flow_{i}.png', dpi = 70)
+    #plt.savefig(f'Optical_flow/VideoFlow/GV_flow_{i}.png', dpi = 70)
 
     print(f"_Frametime: {int(np.ceil(1000*(time.time() - start)))}ms, max movement: {np.round(np.sqrt(np.max(amplitude_field)),2)}, zero-points: {(vector_field[:,:,:] == 0).sum()}                          ", end="\r")
 
