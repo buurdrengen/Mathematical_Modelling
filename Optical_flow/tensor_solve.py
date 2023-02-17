@@ -1,6 +1,7 @@
 import numpy as np
 import time
 
+<<<<<<< HEAD
 def tensor_solve(Vx, Vy, Vt, N = 3):
     """
     Vx, Vy, and Vt must all be the same shape numpy array
@@ -64,28 +65,36 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
 #-------------------------------------------------------------------
 
 # def square_tensor_solve(Vx, Vy, Vt, N = 3):
+=======
+# def tensor_solve(Vx, Vy, Vt, N = 3):
+>>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e
 #     """
-#     Vx, Vy, and Vt must all be the same shape square numpy array
+#     Vx, Vy, and Vt must all be the same shape numpy array
 #     """
 #     # Assume N = 3
 
 #     (n,m) = np.shape(Vx)
-
 #     vector_field = np.zeros((2,n,m))
 
-#     if not n == m: raise Exception("Gradients must be square! - Use ordinary tensor solve otherwise")
 #     if (np.shape(Vy) != (n,m)) or (np.shape(Vt) != (n,m)): raise Exception("Gradients Must be the same shape!")
 #     if N%2 == 0: raise Exception("N must be odd!")
 
-#     # No padding nessersary :)
-#     k = n
-#     r = (N-1)//2; d = 2*r
-#     si = (k-d)**2; sj = N**2  # Matrix dimensions
+#     # Somehow this method only works for square matrices
+#     # Padding is therefore nessersary
+#     k = max(n,m)
+#     Vx = np.pad(Vx,((0,k-n),(0,k-m)), mode="constant")
+#     Vy = np.pad(Vy,((0,k-n),(0,k-m)), mode="constant")
+#     Vt = np.pad(Vt,((0,k-n),(0,k-m)), mode="constant")
 
+#     # Matrix dimensions
+#     r = (N-1)//2; d = 2*r
+#     si = (k-d)**2; sj = N**2  
+
+#     # Predefinitions
 #     A0 = np.zeros((si,sj,2))
 #     b0 = np.zeros((si,sj,1))
 
-#     # grab all submatrices of size (k-d) by (k-d)
+#     # Grab all proper submatrices of size (k-d) by (k-d)
 #     for i in range(sj):
 #         x = i%N; y = i//N
 #         u = x-d; v = y-d
@@ -96,17 +105,96 @@ def tensor_solve(Vx, Vy, Vt, N = 3):
 #         A0[:,i,1] = Vy[y:v,x:u].T.flatten()
 #         b0[:,i,0] = Vt[y:v,x:u].T.flatten()
 
-#     AT = np.transpose(A0,(0,2,1))
+    
+#     # All matricies in A must be square. This is done by 3D matrix multiplication
+#     AT = np.transpose(A0, (0,2,1))
 #     A = np.matmul(AT, A0)
 #     b = np.matmul(AT, b0)
 
+#     # Make sure trivial zeros does not kill the solver :)
+#     # 'A' cannot be singular, so this is fixed here
+#     trivial_zeros = np.argwhere(np.all(A[..., :] == 0, axis=(1,2)))
+#     A[trivial_zeros] = np.array([[1,1],[0,1]])
+#     b[trivial_zeros] = np.array([[0],[1]])
 #     # Magic!
-#     sol = np.linalg.solve(A,-b)
+#     try:
+#         sol = np.linalg.solve(A,-b)
+#     except np.linalg.LinAlgError:
+#         sol = np.zeros((si,2,1))
 
 #     # Reconstruct the vector field to the original size
-#     vector_field[:,r:-r,r:-r] = np.reshape(sol,(k-d,k-d,2)).transpose((2,0,1))
-
+#     vector_field[:,r:-r,r:-r] = np.reshape(sol,(k-d,k-d,2))[:n-d,:m-d].transpose((2,0,1))
+    
 #     return vector_field
+
+
+def fake_solve(Vx, Vy, Vt, N):
+    
+    """
+    This is a test function
+    Returns:
+        vector_field: An upper triangle matrix with vector length (1,1)
+    """
+    
+    r = (N-1)//2
+    (n,m) = np.shape(Vx)
+    vector_field = np.zeros((2,n,m))
+    vector_field[:,r:-r,r:-r] = np.triu(np.ones((2,n-2*r,m-2*r)))
+
+    return vector_field
+
+
+#-------------------------------------------------------------------
+
+def tensor_solve(Vx, Vy, Vt, N = 3):
+    """
+    Vx, Vy, and Vt must all be the same shape square numpy array
+    """
+
+    (n,m) = np.shape(Vx)
+
+    vector_field = np.zeros((2,n,m))
+
+    if (np.shape(Vy) != (n,m)) or (np.shape(Vt) != (n,m)): raise Exception("Gradients Must be the same shape!")
+    if N%2 == 0: raise Exception("N must be odd!")
+
+    # No padding nessersary :)
+    # Matrix dimensions
+    r = (N-1)//2; d = 2*r
+    si = (n-d)*(m-d); sj = N**2
+    A0 = np.zeros((si,sj,2))
+    b0 = np.zeros((si,sj,1))
+
+    # grab all submatrices of size (k-d) by (k-d)
+    for i in range(sj):
+        x = i%N; y = i//N
+        u = x-d; v = y-d
+        if u == 0: u = None
+        if v == 0: v = None
+
+        A0[:,i,0] = Vx[y:v,x:u].flatten()
+        A0[:,i,1] = Vy[y:v,x:u].flatten()
+        b0[:,i,0] = Vt[y:v,x:u].flatten()
+
+
+    # All matricies in A must be square. This is done by 3D matrix multiplication
+    AT = np.transpose(A0,(0,2,1))
+    A = np.matmul(AT, A0)
+    b = np.matmul(AT, b0)
+
+    # Make sure trivial zeros does not kill the solver :)
+    # 'A' cannot be singular, so this is fixed here
+    singular_matrix = (np.linalg.matrix_rank(A, hermitian=True) != 2)
+    A[singular_matrix] = np.array([[1,1],[0,1]])
+    b[singular_matrix] = np.array([[0],[0]])
+
+    # Magic!
+    sol = np.linalg.solve(A,-b)
+
+    # Reconstruct the vector field to the original size
+    vector_field[:,r:-r,r:-r] = np.reshape(sol,(n-d,m-d,2)).transpose((2,0,1))
+
+    return vector_field
 
 
 #-------------------------------------------------------------------
@@ -116,8 +204,13 @@ if __name__ == "__main__":
 
     print("Testing Linalg Solve ..")
 
+<<<<<<< HEAD
     sample_size = (11,125)
     n_samples = 1
+=======
+    sample_size = (480,640)
+    n_samples = 500
+>>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e
     N = 7
 
     r = (N-1)//2
@@ -127,6 +220,7 @@ if __name__ == "__main__":
         n_percent = n_samples
 
     result1 = np.zeros(n_samples); result2 = np.copy(result1)
+    output1 = np.zeros((2,sample_size[0],sample_size[1])); output2 = np.copy(output1)
 
     Vx = np.random.rand(sample_size[0],sample_size[1])
     Vy = np.random.rand(sample_size[0],sample_size[1])
@@ -140,7 +234,7 @@ if __name__ == "__main__":
         Vt[:,:] = np.random.rand(sample_size[0],sample_size[1])
 
         start = time.time()
-        output1 = tensor_solve(Vx, Vy, Vt, N = N)
+        output1[:,:,:] = tensor_solve(Vx, Vy, Vt, N = N)
         result1[i] = time.time() - start
 
     print("\nDone!\n")
@@ -181,7 +275,7 @@ if __name__ == "__main__":
             vector_field[0, x0, y0] = sol[0][0]
             vector_field[1, x0, y0] = sol[0][1]
 
-        output2 = vector_field
+        output2[:,:,:] = vector_field
 
         result2[i] = time.time() - start
 
@@ -192,7 +286,7 @@ if __name__ == "__main__":
 
     print("Comparing...")
 
-    output1 = tensor_solve(Vx, Vy, Vt, N = N)
+    output1[:,:,:] = tensor_solve(Vx, Vy, Vt, N = N)
 
     # print(np.shape(output1))
     # print(np.shape(output2))

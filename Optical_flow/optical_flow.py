@@ -235,18 +235,18 @@ for i in range(tmax):
     vector_field[:, :, :, i] = tensor_solve(Vx = Vx_prewitt[:,:,i], Vy = Vy_prewitt[:,:,i], Vt = Vt_prewitt[:,:,i], N = N)[:, r:-r, r:-r]
 
 
-# for i in range(np.size(x_list)):
-#     if i%1e4 == 0: print(f" Operations: {np.round(i*1e-6,2)} million ", end="\r")
-#     x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
+for i in range(np.size(x_list)):
+    if i%1e4 == 0: print(f" Operations: {np.round(i*1e-6,2)} million ", end="\r")
+    x0=x_list[i]; y0=y_list[i]; t0 = t_list[i]
 
-#     Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-#     Vx_p = Vx_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-#     Vt_p = Vt_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
-#     A = np.stack((Vx_p, Vy_p))
+    Vy_p = Vy_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    Vx_p = Vx_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    Vt_p = Vt_sobel[y0-r:y0+r+1, x0-r:x0+r+1, t0].flatten()
+    A = np.stack((Vx_p, Vy_p))
 
-#     sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
-#     vector_field[0, x0-r, y0-r, t0] = sol[0][0]
-#     vector_field[1, x0-r, y0-r, t0] = sol[0][1]
+    sol = np.linalg.lstsq(A.T, -Vt_p, rcond = None)
+    vector_field[0, x0-r, y0-r, t0] = sol[0][0]
+    vector_field[1, x0-r, y0-r, t0] = sol[0][1]
 
 # print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
 
