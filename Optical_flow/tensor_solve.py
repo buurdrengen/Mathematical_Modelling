@@ -1,73 +1,7 @@
 import numpy as np
 import time
 
-<<<<<<< HEAD
-def tensor_solve(Vx, Vy, Vt, N = 3):
-    """
-    Vx, Vy, and Vt must all be the same shape numpy array
-    """
-    # Assume N = 3
-
-    (n,m) = np.shape(Vx)
-    vector_field = np.zeros((2,n,m))
-
-    if (np.shape(Vy) != (n,m)) or (np.shape(Vt) != (n,m)): raise Exception("Gradients Must be the same shape!")
-    if N%2 == 0: raise Exception("N must be odd!")
-
-    # Somehow this method only works for square matrices
-    # Padding is therefore nessersary
-    k = max(n,m)
-    Vx = np.pad(Vx,((0,k-n),(0,k-m)), mode="constant")
-    Vy = np.pad(Vy,((0,k-n),(0,k-m)), mode="constant")
-    Vt = np.pad(Vt,((0,k-n),(0,k-m)), mode="constant")
-
-    # Matrix dimensions
-    r = (N-1)//2; d = 2*r
-    si = (k-d)**2; sj = N**2  
-
-    # Predefinitions
-    A0 = np.zeros((si,sj,2))
-    b0 = np.zeros((si,sj,1))
-
-    # Grab all proper submatrices of size (k-d) by (k-d)
-    for i in range(sj):
-        x = i%N; y = i//N
-        u = x-d; v = y-d
-        if u == 0: u = None
-        if v == 0: v = None
-
-        A0[:,i,0] = Vx[y:v,x:u].T.flatten()
-        A0[:,i,1] = Vy[y:v,x:u].T.flatten()
-        b0[:,i,0] = Vt[y:v,x:u].T.flatten()
-
-    
-    # All matricies in A must be square. This is done by 3D matrix multiplication
-    AT = np.transpose(A0, (0,2,1))
-    A = np.matmul(AT, A0)
-    b = np.matmul(AT, b0)
-
-    # Make sure trivial zeros does not kill the solver :)
-    # 'A' cannot be singular, so this is fixed here
-    trivial_zeros = np.argwhere(np.all(A[..., :] == 0, axis=(1,2)))
-    A[trivial_zeros] = np.array([[1,1],[0,1]])
-    # Magic!
-    try:
-        sol = np.linalg.solve(A,-b)
-    except np.linalg.LinAlgError:
-        sol = np.zeros((si,2,1))
-
-    # Reconstruct the vector field to the original size
-    vector_field[:,r:-r,r:-r] = np.reshape(sol,(k-d,k-d,2))[:n-d,:m-d].transpose((2,0,1))
-    
-    return vector_field
-
-
-#-------------------------------------------------------------------
-
-# def square_tensor_solve(Vx, Vy, Vt, N = 3):
-=======
 # def tensor_solve(Vx, Vy, Vt, N = 3):
->>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e
 #     """
 #     Vx, Vy, and Vt must all be the same shape numpy array
 #     """
@@ -204,13 +138,8 @@ if __name__ == "__main__":
 
     print("Testing Linalg Solve ..")
 
-<<<<<<< HEAD
-    sample_size = (11,125)
-    n_samples = 1
-=======
     sample_size = (480,640)
     n_samples = 500
->>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e
     N = 7
 
     r = (N-1)//2

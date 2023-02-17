@@ -10,9 +10,9 @@ from tensor_solve import *
 
 # Conditions
 N = 3   # Same N as other script...
-scale_factor = 4 # Scale factor for optical flow. Lower is better but slower
-figsize = (9,16)
-N_a = 8 # Distance between arrows
+scale_factor = 2 # Scale factor for optical flow. Lower is better but slower
+figsize = (6,9)
+N_a = 10 # Distance between arrows
 sigma = 3
 
 image_source = "Optical_flow/Videos/Good_test_video.mp4"
@@ -20,25 +20,6 @@ image_source = "Optical_flow/Videos/Good_test_video.mp4"
 r = (N-1)//2
 
 # Loading camera
-<<<<<<< HEAD:Optical_flow/morten_cam_test.py
-cam = cv2.VideoCapture(1)
-
-w = int(cam.get(3))
-h = int(cam.get(4))
-pic_size = np.min([w, h])
-
-test_frame = np.random.rand(h,w,3)
-frame = np.copy(test_frame[:,:,0])
-frame = frame[:pic_size, :pic_size]
-downscaled_image_old = skimage.transform.downscale_local_mean(frame,(scale_factor,scale_factor)) 
-downscaled_image_new = np.copy(downscaled_image_old)
-downscaled_image = np.copy(downscaled_image_old)
-
-
-fig, ax = plt.subplots(figsize=(8,6))
-background = ax.imshow(test_frame[:pic_size, :pic_size]) 
-fig.suptitle("Camera")
-=======
 cam = cv2.VideoCapture(image_source)
 
 w = int(cam.get(3))
@@ -46,7 +27,6 @@ h = int(cam.get(4))
 n_frames = int(cam.get(7))
 
 
->>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e:Optical_flow/camera.py
 
 
 test_frame = np.random.rand(h,w,3)
@@ -59,15 +39,11 @@ N_im = (n_frames-1)*(n_frames > 0) + (n_frames == -1)*100
 
 ret, frame = cam.read()
 
-pos = np.mgrid[0:pic_size:scale_factor,0:pic_size:scale_factor]
-vector_field = np.zeros((2,pic_size//scale_factor,pic_size//scale_factor))
+pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
+vector_field = np.zeros((2,h//scale_factor,w//scale_factor))
 
 
-<<<<<<< HEAD:Optical_flow/morten_cam_test.py
-opt_flow = ax.quiver(pos[0,r:-r:N_a,r:-r:N_a], pos[1,r:-r:N_a,r:-r:N_a], vector_field[0,r:-r:N_a,r:-r:N_a], -vector_field[1,r:-r:N_a,r:-r:N_a])
-=======
 opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a], vector_field[0,::N_a,::N_a], cmap = "hot")
->>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e:Optical_flow/camera.py
 
 
 for i in range(N_im):
@@ -77,18 +53,12 @@ for i in range(N_im):
         print("failed to grab frame")
         break
     
-    img = skimage.color.rgb2gray(new_frame)[:pic_size, :pic_size]
+    img = skimage.color.rgb2gray(new_frame)
     downscaled_image_new = skimage.transform.downscale_local_mean(img,(scale_factor,scale_factor))
 
 
     image_stack = np.stack((downscaled_image_old, downscaled_image, downscaled_image_new))
     # Shape: (3,y,x)
-<<<<<<< HEAD:Optical_flow/morten_cam_test.py
-    Vy = ndimage.prewitt(image_stack, axis=1)[1,:,:]
-    Vx = ndimage.prewitt(image_stack, axis=2)[1,:,:]
-    Vt = ndimage.prewitt(image_stack, axis=0)[1,:,:] 
-    #Vt = np.copy(downscaled_image - downscaled_image_old)
-=======
     Vy = ndimage.sobel(image_stack, axis=1)[1,:,:]
     Vx = ndimage.sobel(image_stack, axis=2)[1,:,:]
     Vt = ndimage.sobel(image_stack, axis=0)[1,:,:]
@@ -96,7 +66,6 @@ for i in range(N_im):
     # Vy = ndimage.gaussian_filter1d(image_stack, sigma = sigma, order = 1, axis=1)[1,:,:]
     # Vx = ndimage.gaussian_filter1d(image_stack, sigma = sigma, order = 1, axis=2)[1,:,:]
     # Vt = ndimage.gaussian_filter1d(image_stack, sigma = sigma, order = 1, axis=0)[1,:,:]
->>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e:Optical_flow/camera.py
 
 
     vector_field[:,:,:] = tensor_solve(Vx = Vx, Vy = Vy, Vt = Vt, N = N)
@@ -128,13 +97,8 @@ for i in range(N_im):
     # vector_field[1,::N_a,::N_a][amplitude_field <= neglect_value] = 0
 
     # Update Plot
-<<<<<<< HEAD:Optical_flow/morten_cam_test.py
-    background.set_data(cv2.cvtColor(frame[:pic_size, :pic_size], cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0,r:-r:N_a,r:-r:N_a], -vector_field[1,r:-r:N_a,r:-r:N_a])
-=======
     background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
     opt_flow.set_UVC(vector_field[0,::N_a,::N_a], -vector_field[1,::N_a,::N_a], amplitude_field)
->>>>>>> e630e931bccb4c7e06eb09a96a5c4861d788cc3e:Optical_flow/camera.py
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)
