@@ -8,13 +8,13 @@ from tensor_solve import *
 
 
 # Conditions
-scale_factor = 8 # Scale factor for optical flow. Lower is better but slower
+scale_factor = 2 # Scale factor for optical flow. Lower is better but slower
 figsize = (9,16)
-N_a = 4 # Distance between arrows
-sigma_1 = 2
-sigma_2 = 1
+N_a = 20 # Distance between arrows
+sigma_1 = 4
+sigma_2 = 2
 
-image_source = "Optical_flow/Videos/Spinny_wheel.mp4"
+image_source = "Optical_flow/Videos/Good_test_video.mp4"
 
 start = time.time()
 
@@ -69,7 +69,7 @@ fig.suptitle("Camera")
 amplitude_field = vector_field[::N_a,::N_a,:,0]**2 + vector_field[::N_a,::N_a,:,1]**2
 
 pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
-opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[::N_a,::N_a,0,0], vector_field[::N_a,::N_a,0,1],amplitude_field[:,:,0])
+opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[::N_a,::N_a,0,0], vector_field[::N_a,::N_a,0,1], amplitude_field[:,:,0])
 
 print(f"\nDone in {time.strftime('%-M minutes and %-S seconds', time.gmtime(time.time()-start))}")
 

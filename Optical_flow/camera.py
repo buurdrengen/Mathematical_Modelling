@@ -9,10 +9,10 @@ from tensor_solve import *
 
 
 # Conditions
-N = 3   # Same N as other script...
-scale_factor = 2 # Scale factor for optical flow. Lower is better but slower
+N = 5   # Same N as other script...
+scale_factor = 1 # Scale factor for optical flow. Lower is better but slower
 figsize = (6,9)
-N_a = 10 # Distance between arrows
+N_a = 40 # Distance between arrows
 sigma = 3
 
 image_source = "Optical_flow/Videos/Good_test_video.mp4"
@@ -25,8 +25,6 @@ cam = cv2.VideoCapture(image_source)
 w = int(cam.get(3))
 h = int(cam.get(4))
 n_frames = int(cam.get(7))
-
-
 
 
 test_frame = np.random.rand(h,w,3)
@@ -43,7 +41,7 @@ pos = np.mgrid[0:h:scale_factor,0:w:scale_factor]
 vector_field = np.zeros((2,h//scale_factor,w//scale_factor))
 
 
-opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a], vector_field[0,::N_a,::N_a], cmap = "hot")
+opt_flow = plt.quiver(pos[1,::N_a,::N_a], pos[0,::N_a,::N_a], vector_field[0,::N_a,::N_a], vector_field[1,::N_a,::N_a], vector_field[0,::N_a,::N_a], cmap = "hot") #
 
 
 for i in range(N_im):
@@ -91,14 +89,14 @@ for i in range(N_im):
 
     
     # Lets remove small values
-    amplitude_field = vector_field[0,::N_a,::N_a]**2 + vector_field[1,::N_a,::N_a]**2
+    amplitude_field = np.sqrt(vector_field[0,::N_a,::N_a]**2 + vector_field[1,::N_a,::N_a]**2)
     # neglect_value = 0.05
     # vector_field[0,::N_a,::N_a][amplitude_field <= neglect_value] = 0
     # vector_field[1,::N_a,::N_a][amplitude_field <= neglect_value] = 0
 
     # Update Plot
     background.set_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], -vector_field[1,::N_a,::N_a], amplitude_field)
+    opt_flow.set_UVC(vector_field[0,::N_a,::N_a], -vector_field[1,::N_a,::N_a], amplitude_field ) #
     plt.pause(0.01)
     
     downscaled_image_old = np.copy(downscaled_image)
