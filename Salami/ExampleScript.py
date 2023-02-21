@@ -11,7 +11,7 @@
 import helpFunctions as hf 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import misc
+from skimage.io import imread
 import os
 
 dirIn = os.getcwd() + "/Salami/"
