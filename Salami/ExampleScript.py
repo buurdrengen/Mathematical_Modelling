@@ -5,13 +5,16 @@
 # Adapted from work by Anders Bjorholm Dahl
 
 # Folder where your data files are placed
-dirIn = 'C:/Dropbox/ArbejdeDTU/Undervisning/02526_MatematiskModellering/2018/reduced_material/2018/Exercises/exercise1_salami/Python/data/'
+# = 'C:/Dropbox/ArbejdeDTU/Undervisning/02526_MatematiskModellering/2018/reduced_material/2018/Exercises/exercise1_salami/Python/data/'
 
 
 import helpFunctions as hf 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import misc
+import os
+
+dirIn = os.getcwd() + "/Salami/"
     
 
 ## Example of loading a multi spectral image
@@ -73,7 +76,7 @@ plt.show()
 # where the pixel coordinates are given as input
 
 # Load RGB image
-imRGB = misc.imread(dirIn + 'color_day20.png')
+imRGB = imread(dirIn + 'color_day20.png')
 
 # Pixel coordinates for the fat annotation
 [fatPix, fatR, fatC] = hf.getPix(multiIm, annotationIm[:,:,1])

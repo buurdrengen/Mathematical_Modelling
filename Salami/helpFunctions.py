@@ -25,7 +25,7 @@ def loadMulti(imName, *args):
     import scipy.io as sio
     import numpy as np
     from scipy import misc
-    
+    from skimage.io import imread
     annotationName = args[0] 
     if len(args) < 2:
         dirPath = ''
@@ -41,7 +41,7 @@ def loadMulti(imName, *args):
     annotationIm = np.zeros([multiIm.shape[0],multiIm.shape[1],3],dtype=bool)
     
     # read the mask image
-    aIm = misc.imread(dirPath+annotationName)
+    aIm = imread(dirPath+annotationName)
     
     # put in ones
     for i in range(0,3):
