@@ -24,7 +24,6 @@ def loadMulti(imName, *args):
     
     import scipy.io as sio
     import numpy as np
-    from scipy import misc
     from skimage.io import imread
     annotationName = args[0] 
     if len(args) < 2:
