@@ -1,4 +1,4 @@
-file:///C:/Users/anym/Downloads/TenPercent_4x-80kV-10W-15s-LE3_Drift.txrmgigabi# This script exemplifies the use of the various functions supplied for the
+# file:///C:/Users/anym/Downloads/TenPercent_4x-80kV-10W-15s-LE3_Drift.txrmgigabi# This script exemplifies the use of the various functions supplied for the
 # first exercise
 # Anders Nymark Christensen
 # 20180130
