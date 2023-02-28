@@ -53,7 +53,6 @@ entire_im[index_meat] = 2 # set all meat values to class 2
 entire_im[index_background] = 0 # set background to class 0
 
 plt.imshow(entire_im)
-plt.show()
 
 
 """
