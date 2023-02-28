@@ -4,48 +4,48 @@ from matplotlib.ticker import  LinearLocator
 import matplotlib.animation as anim
 
 
-# # Opgave 1.2)
-# mu1 = 175.5; mu2 = 162.9
-# sigma = 6.7
-# var = sigma**2
+# Opgave 1.2)
+mu1 = 175.5; mu2 = 162.9
+sigma = 6.7
+var = sigma**2
 
-# x = np.arange(140,200,0.1)
+x = np.arange(140,200,0.1)
 
-# f1 = 1/(np.sqrt(2*np.pi)*sigma) *np.exp(-1/2 * 1/var * np.power(x-mu1,2))
-# f2 = 1/(np.sqrt(2*np.pi)*sigma) *np.exp(-1/2 * 1/var * np.power(x-mu2,2))
+f1 = 1/(np.sqrt(2*np.pi)*sigma) *np.exp(-1/2 * 1/var * np.power(x-mu1,2))
+f2 = 1/(np.sqrt(2*np.pi)*sigma) *np.exp(-1/2 * 1/var * np.power(x-mu2,2))
 
 
-# fig1 = plt.figure()
+fig1 = plt.figure()
 
-# plt.plot(x,f1, label = "Male")
-# plt.plot(x,f2, label = "Female")
-# plt.title("Gaussian Distributions")
-# plt.xlabel("Height [cm]")
-# plt.ylabel("Probability Density")
-# plt.legend()
-# plt.show()
+plt.plot(x,f1, label = "Male")
+plt.plot(x,f2, label = "Female")
+plt.title("Gaussian Distributions")
+plt.xlabel("Height [cm]")
+plt.ylabel("Probability Density")
+plt.legend()
+plt.show()
 
-# # opgave 1.3)
-# fig2 = plt.figure()
+# opgave 1.3)
+fig2 = plt.figure()
 
-# male = f1/f2
-# female = f2/f1
-# probmale = male/(male+1)
-# probfemale = female/(female+1)
+male = f1/f2
+female = f2/f1
+probmale = male/(male+1)
+probfemale = female/(female+1)
 
-# plt.plot(x,probmale, label = "Male")
-# plt.plot(x,probfemale, label = "Female")
-# plt.title(" Distribution Given Height")
-# plt.xlabel("Height [cm]")
-# plt.ylabel("Probability Distribution")
-# plt.ylim([0,1])
-# plt.legend()
-# plt.grid()
-# plt.show()
+plt.plot(x,probmale, label = "Male")
+plt.plot(x,probfemale, label = "Female")
+plt.title(" Distribution Given Height")
+plt.xlabel("Height [cm]")
+plt.ylabel("Probability Distribution")
+plt.ylim([0,1])
+plt.legend()
+plt.grid()
+plt.show()
 
-# # Opgave 1.4)
-# # svaret er (mu1 + mu2)/2
-# print(f"Critical point: {(mu1+mu2)/2}")
+# Opgave 1.4)
+# svaret er (mu1 + mu2)/2
+print(f"Critical point: {(mu1+mu2)/2}")
 
 
 
@@ -105,7 +105,6 @@ with movie.saving(fig, name + ".mp4", 100):
         surf = ax.plot_surface(x1,x2,new_data, cmap = "gist_ncar", linewidth=0)
         plt.draw()
         movie.grab_frame()
-
 
 new_data = g_cor(2/3)
 surf.remove()
