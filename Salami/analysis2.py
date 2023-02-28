@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os 
 import helpFunctions as hf
+from compare_plot import *
 
 # for i in range(5):
 imName = "Salami/multispectral_day01.mat"
@@ -52,7 +53,9 @@ entire_im[index_fat] = 1 #set all fat values to class 1
 entire_im[index_meat] = 2 # set all meat values to class 2
 entire_im[index_background] = 0 # set background to class 0
 
-plt.imshow(entire_im)
+compare_image(image = entire_im, day="01", title = "Day 1")
+
+#plt.imshow(entire_im)
 
 
 """
@@ -68,14 +71,4 @@ Figures
 #     # plt.legend('fat', 'meat')
 #     plt.pause(1/2)
 
-
-plt.figure()
-plt.plot(np.mean(fat_vector, axis=0), label = 'fat', color='orange')
-plt.plot(np.mean(meat_vector, axis=0), label='meat', color='blue')
-plt.legend()
-plt.xticks(range(19))
-plt.grid()
-plt.show()
-
-
-
+compare_spectrum(fat_vector_means, fat_vector_sd, meat_vector_means, meat_vector_sd, title = "Mean Intensity of Sausage at Day 1")
