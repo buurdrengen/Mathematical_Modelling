@@ -10,10 +10,8 @@ def compare_image(image, day = 1, title="Titel"):
     #     print("Shapes of images mismatch!")
     #     return None
 
-    str_day = "0"*(day<10) + str(day)
-    
     try:
-        color_im = skimage.io.imread("Salami/color_day" + str_day + ".png")
+        color_im = skimage.io.imread("Salami/color_day" + "0"*(day<10) + str(day) + ".png")
     except FileNotFoundError:
         print("No image found for day " + str(day))
         color_im = np.ones(np.shape(image))
