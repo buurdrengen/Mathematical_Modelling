@@ -70,13 +70,14 @@ def train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector):
     mu_fat = np.copy(mean_fat)
     mu_meat = mean_meat
 
-    return Sigma_inv, mu_fat, mu_meat, k
+    return Sigma_inv, mu_fat, mu_meat
 
 # ---------------------------------------------------------------------
 
-def compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, k, pi = 1):
+def compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, pi = 1):
 
-    XT = XT = np.reshape(multiIm,(k[0]*k[1],np.size(mu_fat)))
+    k = [np.size(multiIm,0), np.size(multiIm,1)]
+    XT = np.reshape(multiIm,(k[0]*k[1],np.size(mu_fat)))
 
     S_fat = (np.linalg.multi_dot([XT, Sigma_inv, mu_fat]) - 1/2 * np.linalg.multi_dot([mu_fat.T, Sigma_inv, mu_fat]) + np.log(pi)).reshape(k)
     S_meat = (np.linalg.multi_dot([XT, Sigma_inv, mu_meat]) - 1/2 * np.linalg.multi_dot([mu_meat.T, Sigma_inv, mu_meat]) + np.log(pi)).reshape(k)
@@ -122,8 +123,8 @@ if __name__ == "__main__":
     errorrate_1 = compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = "TV")
 
     # Multivariate Linear Discriminant
-    Sigma_inv, mu_fat, mu_meat, k = train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector)
-    index_fat, index_meat = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, k)
+    Sigma_inv, mu_fat, mu_meat = train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector)
+    index_fat, index_meat = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat)
     errorrate_2 = compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = "MLD")
 
     #Evaluation
