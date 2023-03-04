@@ -53,7 +53,7 @@ entire_im[index_fat] = 1 #set all fat values to class 1
 entire_im[index_meat] = 2 # set all meat values to class 2
 entire_im[index_background] = 0 # set background to class 0
 
-compare_image(image = entire_im, day="01", title = "Day 1")
+compare_image(image = entire_im, day = 1 , title = "Day 1")
 
 #plt.imshow(entire_im)
 

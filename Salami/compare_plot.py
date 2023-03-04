@@ -4,15 +4,18 @@ import skimage
 
 spectre = np.array([410, 438, 450, 468, 502, 519, 572, 591, 625, 639, 653, 695, 835, 863, 880, 913, 929, 940, 955])
 
-def compare_image(image, day=1, title="Titel"):
+def compare_image(image, day = 1, title="Titel"):
 
     # if np.shape(image1) != np.shape(image2):
     #     print("Shapes of images mismatch!")
     #     return None
+
+    str_day = "0"*(day<10) + str(day)
+    
     try:
-        color_im = skimage.io.imread("Salami/color_day" + str(day) + ".png")
+        color_im = skimage.io.imread("Salami/color_day" + str_day + ".png")
     except FileNotFoundError:
-        print("No image found for selected day: " + str(day))
+        print("No image found for day " + str(day))
         color_im = np.ones(np.shape(image))
 
     fig, [ax1,ax2] = plt.subplots(1,2, figsize=(8,4))
