@@ -27,12 +27,15 @@ def load_day_data(day):
 # ---------------------------------------------------------------------
 
 def compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = None):
-    correct_fat = np.sum(index_fat[true_fat] == 1)/np.sum(true_fat)
-    correct_meat = np.sum(index_meat[true_meat] == 1)/np.sum(true_meat)
 
     errorrate = (np.sum(index_fat[true_fat] == 0) + np.sum(index_meat[true_meat] == 0)) / (np.sum(true_fat) + np.sum(true_meat))
 
-    if method_name != None: print(f"{method_name} guessed correctly {correct_fat*100:.2f}% for fat and {correct_meat*100:.2f}% for meat")
+    if method_name != None: 
+        error_fat = np.sum(index_fat[true_fat] == 0)/np.sum(true_fat)
+        error_meat = np.sum(index_meat[true_meat] == 0)/np.sum(true_meat)
+        
+        print(f"{method_name} has an error rate of {error_fat*100:.2f}% for fat and {error_meat*100:.2f}% for meat for a total of {errorrate*100:0.2f}%")
+    
     return errorrate
 
 # ---------------------------------------------------------------------
@@ -108,4 +111,21 @@ def compute_threshold_value(multiIm, t, best_band):
     index_meat = (best_band_im <= t[best_band])
 
     return index_fat, index_meat
-    
+
+
+if __name__ == "__main__":
+    multiIm, true_fat, true_meat, index_background, fat_vector, meat_vector = load_day_data(1)
+
+    # Threshold Value
+    t, best_band = train_threshold_value(fat_vector, meat_vector)
+    index_fat, index_meat = compute_threshold_value(multiIm,t, best_band)
+    errorrate_1 = compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = "TV")
+
+    # Multivariate Linear Discriminant
+    Sigma_inv, mu_fat, mu_meat, k = train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector)
+    index_fat, index_meat = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, k)
+    errorrate_2 = compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = "MLD")
+
+    #Evaluation
+    print("The best method is " + "TV"*int(errorrate_1 < errorrate_2) + "MLD"*int(errorrate_1 > errorrate_2))
+        
