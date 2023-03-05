@@ -189,7 +189,7 @@ def compute_threshold_value(multiIm, t, best_band):
 
 # ---------------------------------------------------------------------
 
-def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = False, print_error = True):
+def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = True, print_error = True, pi = 0.5):
     """ Performs cross-comparisons of a training set and a set of given days.
     
     Please find a better name for this function...
