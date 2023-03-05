@@ -34,11 +34,11 @@ def compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = 
 
 # ---------------------------------------------------------------------
 
-def construct_entire_im(index_fat, index_meat, index_background):
+def construct_entire_im(index_fat, index_meat, index_background, cmap = None):
     entire_im = np.zeros(np.shape(index_fat))
-    entire_im[index_fat] = 1
-    entire_im[index_meat] = 2
-    entire_im[index_background] = 0
+    entire_im[index_fat] = 1 -2*int(cmap == "coolwarm") + 1*int(cmap in ["hot", "gray"])
+    entire_im[index_meat] = 2 - 1*int(cmap in ["coolwarm", "gray"]) -3*int(cmap=="BrBG") - 1.6*int(cmap == "hot")
+    entire_im[index_background] = 0 + 3*int(cmap == "RdPu") + 1.5*int(cmap == "PuRd")
     return entire_im
 # ---------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ def compute_threshold_value(multiIm, t, best_band):
 
 # ---------------------------------------------------------------------
 
-def alpha(train_day, compare_days, plot = False):
+def alpha(train_day, compare_days, plot = False, cmap = None, save_fig = False):
     
     if np.shape(compare_days) == (): compare_days = np.array([compare_days])
     
@@ -118,8 +118,10 @@ def alpha(train_day, compare_days, plot = False):
     t, best_band = train_threshold_value(fat_vector, meat_vector)
     Sigma_inv, mu_fat, mu_meat = train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector)
     
+    err = np.zeros((np.size(compare_days),2))
+    
     # Computation
-    for i in compare_days:
+    for j,i in enumerate(compare_days):
         print("\nDay " + str(i))
         multiIm, true_fat, true_meat, index_background, _, _ = load_day_data(i)
         index_fat_tv, index_meat_tv = compute_threshold_value(multiIm,t, best_band)
@@ -127,21 +129,33 @@ def alpha(train_day, compare_days, plot = False):
         index_fat_mld, index_meat_mld = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat)
         errorrate_mld = compute_errorrate(true_fat, true_meat, index_fat_mld, index_meat_mld, method_name = "MLD")
         
+        err[j,:] = [errorrate_tv,errorrate_mld]
+        
         # Evaluation
         print("The best method is " + "TV"*int(errorrate_tv < errorrate_mld) + "MLD"*int(errorrate_tv > errorrate_mld))
         
         if plot:
-            imagetv = construct_entire_im(index_fat_tv, index_meat_tv, index_background)
-            imagemld = construct_entire_im(index_fat_mld, index_meat_mld, index_background)
-            compare_train(imagetv, imagemld, day = i, title = f"Day {i} Trained on Day {train_day}")
+            imagetv = construct_entire_im(index_fat_tv, index_meat_tv, index_background, cmap=cmap)
+            imagemld = construct_entire_im(index_fat_mld, index_meat_mld, index_background, cmap=cmap)
+            compare_train(imagetv, imagemld, day = i, title = f"Day {i} Trained on Day {train_day}", cmap=cmap, save_fig = save_fig)
         
     
-    return None
+    return err
 
 
 # ---------------------------------------------------------------------
 
 if __name__ == "__main__":
 
-    alpha(1,[1,6,13,20,28], plot = True)
+    # cmap: implemented:
+    #   coolwarm
+    #   BrBG
+    #   GnBu
+    #   hot
+    #   RdPu
+    #   PuRd
+    #   gray
         
+    
+    alpha(1,[1,6,13,20,28], plot = True, cmap = "hot")
+    

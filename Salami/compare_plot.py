@@ -38,7 +38,9 @@ def compare_spectrum(mean_fat, sd_fat, mean_meat, sd_meat, signific = 2, ecolor 
 
 # ---------------------------------------------------------------------
 
-def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "Multivariate Linear Discriminant"]):
+def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "Multivariate Linear Discriminant"], cmap = None, save_fig = False):
+    
+    if cmap == None: cmap = "viridis"
     
     try:
         color_im = skimage.io.imread("Salami/color_day" + "0"*(day<10) + str(day) + ".png")
@@ -48,10 +50,15 @@ def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Origin
 
     fig, [ax1,ax2,ax3] = plt.subplots(1,3, figsize=(12,4))
     fig.suptitle(title)
-    ax1.imshow(color_im)
+    ax1.imshow(color_im, cmap = cmap)
     ax1.set_title(im_title[0])
-    ax2.imshow(imagetv)
+    ax2.imshow(imagetv, cmap = cmap)
     ax2.set_title(im_title[1])
-    ax3.imshow(imagemld)
+    ax3.imshow(imagemld, cmap = cmap)
     ax3.set_title(im_title[2])
     plt.show()
+    
+    if save_fig:
+        None
+    
+    plt.close(fig)
