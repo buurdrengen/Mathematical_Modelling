@@ -38,7 +38,7 @@ def compare_spectrum(mean_fat, sd_fat, mean_meat, sd_meat, signific = 2, ecolor 
 
 # ---------------------------------------------------------------------
 
-def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "Multivariate Linear Discriminant"], cmap = None, save_fig = False):
+def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "Multivariate Linear Discriminant"], cmap = None, save_fig = None, show_fig = True):
     
     if cmap == None: cmap = "viridis"
     
@@ -56,9 +56,11 @@ def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Origin
     ax2.set_title(im_title[1])
     ax3.imshow(imagemld, cmap = cmap)
     ax3.set_title(im_title[2])
-    plt.show()
-    
+
     if save_fig:
-        None
+        plt.draw()
+        plt.savefig("Salami/plots/" + save_fig + ".png", dpi = 300)
+    
+    if show_fig: plt.show()
     
     plt.close(fig)

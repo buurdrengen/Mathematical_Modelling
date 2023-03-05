@@ -24,7 +24,7 @@ def compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = 
 
     errorrate = (np.sum(index_fat[true_fat] == 0) + np.sum(index_meat[true_meat] == 0)) / (np.sum(true_fat) + np.sum(true_meat))
 
-    if method_name != None: 
+    if method_name: 
         error_fat = np.sum(index_fat[true_fat] == 0)/np.sum(true_fat)
         error_meat = np.sum(index_meat[true_meat] == 0)/np.sum(true_meat)
         
@@ -109,9 +109,10 @@ def compute_threshold_value(multiIm, t, best_band):
 
 # ---------------------------------------------------------------------
 
-def alpha(train_day, compare_days, plot = False, cmap = None, save_fig = False):
+def alpha(train_day, compare_days, plot = False, cmap = None, save_fig = False, show_fig = True, print_error = True):
     
     if np.shape(compare_days) == (): compare_days = np.array([compare_days])
+    save_name = None
     
     #Training
     multiIm, _, _, _, fat_vector, meat_vector = load_day_data(train_day)
@@ -122,22 +123,23 @@ def alpha(train_day, compare_days, plot = False, cmap = None, save_fig = False):
     
     # Computation
     for j,i in enumerate(compare_days):
-        print("\nDay " + str(i))
+        if print_error: print("\nDay " + str(i))
         multiIm, true_fat, true_meat, index_background, _, _ = load_day_data(i)
         index_fat_tv, index_meat_tv = compute_threshold_value(multiIm,t, best_band)
-        errorrate_tv = compute_errorrate(true_fat, true_meat, index_fat_tv, index_meat_tv, method_name = "TV")
+        errorrate_tv = compute_errorrate(true_fat, true_meat, index_fat_tv, index_meat_tv, method_name = "TV"*int(print_error))
         index_fat_mld, index_meat_mld = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat)
-        errorrate_mld = compute_errorrate(true_fat, true_meat, index_fat_mld, index_meat_mld, method_name = "MLD")
+        errorrate_mld = compute_errorrate(true_fat, true_meat, index_fat_mld, index_meat_mld, method_name = "MLD"*int(print_error))
         
         err[j,:] = [errorrate_tv,errorrate_mld]
         
         # Evaluation
-        print("The best method is " + "TV"*int(errorrate_tv < errorrate_mld) + "MLD"*int(errorrate_tv > errorrate_mld))
+        if print_error: print("The best method is " + "TV"*int(errorrate_tv < errorrate_mld) + "MLD"*int(errorrate_tv > errorrate_mld))
         
         if plot:
+            if save_fig: save_name = f"day{i}_t{train_day}"
             imagetv = construct_entire_im(index_fat_tv, index_meat_tv, index_background, cmap=cmap)
             imagemld = construct_entire_im(index_fat_mld, index_meat_mld, index_background, cmap=cmap)
-            compare_train(imagetv, imagemld, day = i, title = f"Day {i} Trained on Day {train_day}", cmap=cmap, save_fig = save_fig)
+            compare_train(imagetv, imagemld, day = i, title = f"Day {i} Trained on Day {train_day}", cmap=cmap, save_fig = save_name, show_fig = show_fig)
         
     
     return err
@@ -149,13 +151,33 @@ if __name__ == "__main__":
 
     # cmap: implemented:
     #   coolwarm
-    #   BrBG
+    #   BrBGm
     #   GnBu
     #   hot
     #   RdPu
     #   PuRd
     #   gray
         
+        
+    liste = [1,6,13,20,28]
+    result = np.zeros((np.size(liste), np.size(liste), 2))
+    for j,i in enumerate(liste):
+        print("\n" + 25*"-")
+        print(f"Training on day {i}")
+        result[j,:,:] = alpha(i,liste, plot = True, cmap = "seismic", save_fig=True, show_fig = False, print_error = False)
     
-    alpha(1,[1,6,13,20,28], plot = True, cmap = "hot")
+    print("Data for TV:")
+    print(np.round(result[:,:,0]*100,2))
+    print(25*"-")
+    print("Data for MLD:")
+    print(np.round(result[:,:,1]*100,2))
     
+    I = np.eye(np.size(liste), dtype=int)
+    
+    result[:,:,0] = result[:,:,0] -I*result[:,:,0]
+    result[:,:,1] = result[:,:,1] -I*result[:,:,1]
+    
+    # print(result[:,:,0])
+    print(25*"-")
+    print("Mean Values:")
+    print(np.round(np.sum(result*25,axis=1),2))
