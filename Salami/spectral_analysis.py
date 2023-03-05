@@ -45,7 +45,7 @@ def compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = 
         method_name (str, optional): If given, this will display additional information about the guess. Defaults to None.
 
     Returns:
-        error_rate (float): The fraction of guessed pixels known to wrong over the total number of known pixels.
+        error_rate (float): The fraction of guessed pixels known to be wrong over the total number of known pixels.
     """
 
     error_rate = (np.sum(index_fat[true_fat] == 0) + np.sum(index_meat[true_meat] == 0)) / (np.sum(true_fat) + np.sum(true_meat))
@@ -189,7 +189,7 @@ def compute_threshold_value(multiIm, t, best_band):
 
 # ---------------------------------------------------------------------
 
-def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = True, print_error = True, pi = 0.5):
+def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = False, print_error = True):
     """ Performs cross-comparisons of a training set and a set of given days.
     
     Please find a better name for this function...
