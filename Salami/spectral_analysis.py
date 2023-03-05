@@ -1,16 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import os 
 import helpFunctions as hf
-
-
-
-
-
+from compare_plot import compare_train
 
 
 def load_day_data(day):
-    str_day = "0"*(day<10)+str(day)
+    str_day = "0"*int(day<10)+str(day)
     imName = "Salami/multispectral_day" + str_day + ".mat"
     annotationName = "Salami/annotation_day" + str_day + ".png"
     [multiIm, annotationIm] = hf.loadMulti(imName, annotationName)
@@ -113,20 +107,41 @@ def compute_threshold_value(multiIm, t, best_band):
 
     return index_fat, index_meat
 
+# ---------------------------------------------------------------------
+
+def alpha(train_day, compare_days, plot = False):
+    
+    if np.shape(compare_days) == (): compare_days = np.array([compare_days])
+    
+    #Training
+    multiIm, _, _, _, fat_vector, meat_vector = load_day_data(train_day)
+    t, best_band = train_threshold_value(fat_vector, meat_vector)
+    Sigma_inv, mu_fat, mu_meat = train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector)
+    
+    # Computation
+    for i in compare_days:
+        print("\nDay " + str(i))
+        multiIm, true_fat, true_meat, index_background, _, _ = load_day_data(i)
+        index_fat_tv, index_meat_tv = compute_threshold_value(multiIm,t, best_band)
+        errorrate_tv = compute_errorrate(true_fat, true_meat, index_fat_tv, index_meat_tv, method_name = "TV")
+        index_fat_mld, index_meat_mld = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat)
+        errorrate_mld = compute_errorrate(true_fat, true_meat, index_fat_mld, index_meat_mld, method_name = "MLD")
+        
+        # Evaluation
+        print("The best method is " + "TV"*int(errorrate_tv < errorrate_mld) + "MLD"*int(errorrate_tv > errorrate_mld))
+        
+        if plot:
+            imagetv = construct_entire_im(index_fat_tv, index_meat_tv, index_background)
+            imagemld = construct_entire_im(index_fat_mld, index_meat_mld, index_background)
+            compare_train(imagetv, imagemld, day = i, title = f"Day {i} Trained on Day {train_day}")
+        
+    
+    return None
+
+
+# ---------------------------------------------------------------------
 
 if __name__ == "__main__":
-    multiIm, true_fat, true_meat, index_background, fat_vector, meat_vector = load_day_data(1)
 
-    # Threshold Value
-    t, best_band = train_threshold_value(fat_vector, meat_vector)
-    index_fat, index_meat = compute_threshold_value(multiIm,t, best_band)
-    errorrate_1 = compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = "TV")
-
-    # Multivariate Linear Discriminant
-    Sigma_inv, mu_fat, mu_meat = train_multivariate_linear_discriminant(multiIm, fat_vector, meat_vector)
-    index_fat, index_meat = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat)
-    errorrate_2 = compute_errorrate(true_fat, true_meat, index_fat, index_meat, method_name = "MLD")
-
-    #Evaluation
-    print("The best method is " + "TV"*int(errorrate_1 < errorrate_2) + "MLD"*int(errorrate_1 > errorrate_2))
+    alpha(1,[1,6,13,20,28], plot = True)
         

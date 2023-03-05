@@ -4,11 +4,9 @@ import skimage
 
 spectre = np.array([410, 438, 450, 468, 502, 519, 572, 591, 625, 639, 653, 695, 835, 863, 880, 913, 929, 940, 955])
 
-def compare_image(image, day = 1, title="Titel"):
+# ---------------------------------------------------------------------
 
-    # if np.shape(image1) != np.shape(image2):
-    #     print("Shapes of images mismatch!")
-    #     return None
+def compare_image(image, day = 1, title="Titel"):
 
     try:
         color_im = skimage.io.imread("Salami/color_day" + "0"*(day<10) + str(day) + ".png")
@@ -22,7 +20,7 @@ def compare_image(image, day = 1, title="Titel"):
     ax2.imshow(image)
     plt.show()
 
-
+# ---------------------------------------------------------------------
 
 def compare_spectrum(mean_fat, sd_fat, mean_meat, sd_meat, signific = 2, ecolor = ["black", "black"], capsize = 5, color = ["orange", "blue"], spectrum = spectre, title = "Titel", xtick_align = False):
     
@@ -36,4 +34,24 @@ def compare_spectrum(mean_fat, sd_fat, mean_meat, sd_meat, signific = 2, ecolor 
     plt.ylabel("Mean Intensity")
     plt.title(title)
     if xtick_align: plt.xticks(spectrum)
+    plt.show()
+
+# ---------------------------------------------------------------------
+
+def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "Multivariate Linear Discriminant"]):
+    
+    try:
+        color_im = skimage.io.imread("Salami/color_day" + "0"*(day<10) + str(day) + ".png")
+    except FileNotFoundError:
+        print("No image found for day " + str(day))
+        color_im = np.ones(np.shape(imagetv))
+
+    fig, [ax1,ax2,ax3] = plt.subplots(1,3, figsize=(12,4))
+    fig.suptitle(title)
+    ax1.imshow(color_im)
+    ax1.set_title(im_title[0])
+    ax2.imshow(imagetv)
+    ax2.set_title(im_title[1])
+    ax3.imshow(imagemld)
+    ax3.set_title(im_title[2])
     plt.show()
