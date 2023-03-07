@@ -189,6 +189,20 @@ def compute_threshold_value(multiIm, t, best_band):
 
 # ---------------------------------------------------------------------
 
+def compute_fat_content(index_fat, index_meat, index_background):
+
+    index_fat[index_background] = 0
+    index_meat[index_background] = 0
+
+    m_fat = np.sum(index_fat)
+    m_meat = np.sum(index_meat)
+
+    fat = m_fat /(m_fat + m_meat)
+
+    return fat
+
+# ---------------------------------------------------------------------
+
 def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = True, print_error = True, pi = 0.5):
     """ Performs cross-comparisons of a training set and a set of given days.
     
@@ -199,7 +213,7 @@ def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = Tru
         compare_days (ndarray): The days to cross-compare with the trained models.
         cmap (str, optional): If given, this will apply a specific colormap to the plot. Defaults to None.
         save_fig (bool, optional): If true, this will save the plot to a file on disk. Defaults to False.
-        show_fig (bool, optional): If true, this will display the plot. Defaults to True.
+        show_fig (bool, optional): )If true, this will display the plot. Defaults to True.
         print_error (bool, optional): If true, this will print information about the error rate. Defaults to True.
         pi (float, optional): Prior probability that any given pixel is fat. Defaults to 0.5.
 
@@ -209,13 +223,15 @@ def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = Tru
     
     if np.shape(compare_days) == (): compare_days = np.array([compare_days])
     save_name = None
+    pi0 = 0.5
     
     #Training
     multiIm, _, _, _, fat_vector, meat_vector = load_day_data(train_day)
     t, best_band = train_threshold_value(fat_vector, meat_vector)
     Sigma_inv, mu_fat, mu_meat = train_multivariate_linear_discriminant(fat_vector, meat_vector)
     
-    err = np.zeros((np.size(compare_days),2))
+    err = np.zeros((np.size(compare_days),3))
+    fat = np.zeros((np.size(compare_days),3))
     
     # Cross-comparison
     for j,i in enumerate(compare_days):
@@ -223,10 +239,19 @@ def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = Tru
         multiIm, true_fat, true_meat, index_background, _, _ = load_day_data(i)
         index_fat_tv, index_meat_tv = compute_threshold_value(multiIm,t, best_band)
         errorrate_tv = compute_errorrate(true_fat, true_meat, index_fat_tv, index_meat_tv, method_name = "TV"*int(print_error))
-        index_fat_mld, index_meat_mld = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, pi = pi)
+        index_fat_mld, index_meat_mld = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, pi = pi0)
         errorrate_mld = compute_errorrate(true_fat, true_meat, index_fat_mld, index_meat_mld, method_name = "MLD"*int(print_error))
+        index_fat_mld_pi, index_meat_mld_pi = compute_multivariate_linear_discriminant(multiIm, Sigma_inv, mu_fat, mu_meat, pi = pi)
+        errorrate_mld_pi = compute_errorrate(true_fat, true_meat, index_fat_mld_pi, index_meat_mld_pi, method_name = "MLD(p)"*int(print_error))
         
-        err[j,:] = [errorrate_tv,errorrate_mld]
+        err[j,:] = [errorrate_tv,errorrate_mld, errorrate_mld_pi]
+
+        fat_tv = compute_fat_content(index_fat_tv, index_meat_tv, index_background)
+        fat_mld = compute_fat_content(index_fat_mld, index_meat_mld, index_background)
+        fat_pi = compute_fat_content(index_fat_mld_pi, index_meat_mld_pi, index_background)
+        fat[j,:] = [fat_tv,fat_mld,fat_pi]
+
+
         
         # Evaluation
         if print_error: print("The best method is " + "TV"*int(errorrate_tv < errorrate_mld) + "MLD"*int(errorrate_tv > errorrate_mld))
@@ -235,10 +260,11 @@ def alpha(train_day, compare_days, cmap = None, save_fig = False, show_fig = Tru
         if save_fig: save_name = f"day{i}_t{train_day}"
         imagetv = construct_entire_im(index_fat_tv, index_meat_tv, index_background, cmap=cmap)
         imagemld = construct_entire_im(index_fat_mld, index_meat_mld, index_background, cmap=cmap)
-        compare_train(imagetv, imagemld, day = i, title = f"Day {i} Trained on Day {train_day}", cmap=cmap, save_fig = save_name, show_fig = show_fig)
+        imagemld_pi = construct_entire_im(index_fat_mld_pi, index_meat_mld_pi, index_background, cmap=cmap)
+        compare_train(imagetv, imagemld, imagemld_pi, day = i, title = f"Day {i} Trained on Day {train_day}", cmap=cmap, save_fig = save_name, show_fig = show_fig)
         
     
-    return err
+    return err, fat
 
 
 # ---------------------------------------------------------------------
@@ -256,24 +282,42 @@ if __name__ == "__main__":
         
         
     liste = [1,6,13,20,28]
-    result = np.zeros((np.size(liste), np.size(liste), 2))
+    result = np.zeros((np.size(liste), np.size(liste), 3))
+    fat = np.zeros((np.size(liste), np.size(liste), 3))
     for j,i in enumerate(liste):
         print("\n" + 25*"-")
         print(f"Training on day {i}")
-        result[j,:,:] = alpha(i,liste, cmap = "seismic", save_fig=False, show_fig = False, print_error = False)
+        result[j,:,:], fat[j,:,:] = alpha(i,liste, cmap = "seismic", save_fig=False, show_fig = False, print_error = False, pi=0.3)
     
-    print("Data for TV:")
+    print("Errorrate for TV:")
     print(np.round(result[:,:,0]*100,2))
+    print("Fat Content for TV:")
+    print(np.round(fat[:,:,0]*100,2))
     print(25*"-")
-    print("Data for MLD:")
+    print("Errorrate for LDA:")
     print(np.round(result[:,:,1]*100,2))
+    print("Fat Content for LDA:")
+    print(np.round(fat[:,:,1]*100,2))
+    print(25*"-")
+    print("Errorrate for PI:")
+    print(np.round(result[:,:,2]*100,2))
+    print("Fat Content for PI:")
+    print(np.round(fat[:,:,2]*100,2))
+
     
     I = np.eye(np.size(liste), dtype=int)
     
     result[:,:,0] = result[:,:,0] -I*result[:,:,0]
     result[:,:,1] = result[:,:,1] -I*result[:,:,1]
+    result[:,:,2] = result[:,:,2] -I*result[:,:,2]
+
+    fat[:,:,0] = fat[:,:,0] -I*fat[:,:,0]
+    fat[:,:,1] = fat[:,:,1] -I*fat[:,:,1]
+    fat[:,:,2] = fat[:,:,2] -I*fat[:,:,2]
     
     # print(result[:,:,0])
     print(25*"-")
-    print("Mean Values:")
+    print("Mean Errorrates:")
     print(np.round(np.sum(result*25,axis=1),2))
+    print("Mean Fat Content:")
+    print(np.round(np.sum(fat*25,axis=1),2))

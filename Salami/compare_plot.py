@@ -38,29 +38,43 @@ def compare_spectrum(mean_fat, sd_fat, mean_meat, sd_meat, signific = 2, ecolor 
 
 # ---------------------------------------------------------------------
 
-def compare_train(imagetv, imagemld, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "Multivariate Linear Discriminant"], cmap = None, save_fig = None, show_fig = True):
+def compare_train(image1, image2 = 0, image3 = 0, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "LDA without PN", "LDA with PA"], cmap = None, save_fig = None, show_fig = True):
     
     if cmap == None: cmap = "viridis"
+    image = np.ones(4, dtype = int)
+    if np.size(image2) < 4:
+        #imagemld = np.zeros(np.shape(imagetv))
+        image[2] = 0
+    if np.size(image3) < 4: 
+        #imagepi = np.zeros(np.shape(imagetv))
+        image[3] = 0
     
+    n = np.sum(image)
+
     try:
         color_im = skimage.io.imread("Salami/color_day" + "0"*(day<10) + str(day) + ".png")
     except FileNotFoundError:
         print("No image found for day " + str(day))
-        color_im = np.ones(np.shape(imagetv))
+        color_im = np.ones(np.shape(image1))
 
-    fig, [ax1,ax2,ax3] = plt.subplots(1,3, figsize=(12,4))
-    fig.suptitle(title)
-    ax1.imshow(color_im, cmap = cmap)
-    ax1.set_title(im_title[0])
-    ax2.imshow(imagetv, cmap = cmap)
-    ax2.set_title(im_title[1])
-    ax3.imshow(imagemld, cmap = cmap)
-    ax3.set_title(im_title[2])
+    fig, ax = plt.subplots(1,n, figsize=(4*n,4.5), sharey=True)
+    fig.subplots_adjust(wspace=0, hspace=10)
+    fig.suptitle(title, fontsize = 16)
+    ax[0].imshow(color_im, cmap = cmap)
+    ax[0].set_title(im_title[0])
+    ax[1].imshow(image1, cmap = cmap)
+    ax[1].set_title(im_title[1])
+    if image[2]:
+        ax[2].imshow(image2, cmap = cmap)
+        ax[2].set_title(im_title[2])
+    if image[3]:
+        ax[2 + image[2]].imshow(image3, cmap = cmap)
+        ax[2 + image[2]].set_title(im_title[3])
 
     if save_fig:
         plt.draw()
         plt.savefig("Salami/plots/" + save_fig + ".png", dpi = 300)
     
-    if show_fig: plt.show()
+    if show_fig: plt.pause(2)
     
     plt.close(fig)
