@@ -125,8 +125,6 @@ entire_im[index_background, 0] = 0 # set background to class 0
 
 
 
-
-
 """
 error rates for all days
 """
@@ -205,7 +203,6 @@ ax1.set_xticks(np.linspace(10-3, 50-3, 5), day_list)
 fig.legend()
 plt.savefig('Salami/error_rates.png')
 
-plt.show()
 
 
 """
@@ -231,4 +228,32 @@ Figures
 # plt.show()
 
 
+for day in day_list:
+    imName = f"Salami/multispectral_day{day}.mat"
+    annotationName = f"Salami/annotation_day{day}.png"
+    [multiIm, annotationIm] = hf.loadMulti(imName, annotationName)
 
+    # Define the annoted fat and meat vectors
+    fat_vector = multiIm[annotationIm[:,:,1], :]
+    meat_vector = multiIm[annotationIm[:,:,2], :]
+
+    # Finding the mean vectors for the classes wrt. all variables. 
+    fat_vector_means = np.mean(fat_vector, axis=0)
+    meat_vector_means = np.mean(meat_vector, axis=0)
+
+    # Finding the standard devations wrt all variables
+    fat_vector_sd = np.std(fat_vector, axis=0)
+    meat_vector_sd = np.std(meat_vector, axis=0)
+
+    
+    spectrum = np.array([410, 438, 450, 468, 502, 519, 572, 591, 625, 639, 653, 695, 835, 863, 880, 913, 929, 940, 955])
+    plt.figure()
+    plt.errorbar(spectrum, fat_vector_means, 2*fat_vector_sd, capsize=5, ecolor='black', label='fat', color='orange')
+    plt.errorbar(spectrum, meat_vector_means, 2*meat_vector_sd, capsize=5, ecolor='black',  label='meat', color='blue')
+    plt.legend()
+    plt.grid()
+    plt.xlabel("Frequency [nm]")
+    plt.ylabel("Mean Intensity [pixel value]")
+    plt.title(f"Mean Intensity of Sausage at Day {day}")
+    plt.savefig(f"Salami/variance_plot_day{day}.png")
+    plt.show()
