@@ -256,4 +256,4 @@ for day in day_list:
     plt.ylabel("Mean Intensity [pixel value]")
     plt.title(f"Mean Intensity of Sausage at Day {day}")
     plt.savefig(f"Salami/variance_plot_day{day}.png")
-    plt.show()
+    # plt.show()
