@@ -20,9 +20,25 @@ K = [
 
 
 function constructA(H,K)
+    h = length(H)
+    k = length(K)-1
+    A = zeros(h,h+2*k)
+
+    for i in 1:h
+        A[i,i:i+2*k] = hcat(transpose(reverse(K[2:end])), K)
+    end
+    
+    A = A[:,k+1:end-k]
+
+    B = H + 10
+
     # Make a function that returns A when given H and K
-    return A
+    return A, B
 end
+
+A, B = constructA(H,K)
+
+
 
 # A should be structured as follows
 A = [300.0  140.0   40.0    0.0    0.0    0.0    0.0    0.0    0.0    0.0
@@ -49,7 +65,7 @@ function solveIP(H, K)
     @variable(myModel, x[1:h], Bin )
     @variable(myModel, R[1:h] >= 0 )
 
-    @objective(myModel, Min, sum(x[j] for j=1:h) )
+    @objective(myModel, Min, sum(x) )
 
     @constraint(myModel, [j=1:h],R[j] >= H[j] + 10 )
     @constraint(myModel, [i=1:h],R[i] == sum(A[i,j]*x[j] for j=1:h) )
