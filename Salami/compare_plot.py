@@ -38,7 +38,7 @@ def compare_spectrum(mean_fat, sd_fat, mean_meat, sd_meat, signific = 2, ecolor 
 
 # ---------------------------------------------------------------------
 
-def compare_train(image1, image2 = 0, image3 = 0, day = 1, title="Titel", im_title = ["Original", "Threshold Value", "LDA without PN", "LDA with PA"], cmap = None, save_fig = None, show_fig = True):
+def compare_train(image1, image2 = np.array([0]), image3 = np.array([0]), day = 1, title="Titel", im_title = ["Original", "Threshold Value", r"LDA with $p_{fat} = 50\%$", r"LDA with $p_{fat} = 30\%$"], cmap = None, save_fig = None, show_fig = True):
     
     if cmap == None: cmap = "viridis"
     image = np.ones(4, dtype = int)

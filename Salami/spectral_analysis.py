@@ -281,7 +281,7 @@ if __name__ == "__main__":
     #   gray
         
         
-    liste = [1,6,13,20,28]
+    liste = np.array([1,6,13,20,28])
     result = np.zeros((np.size(liste), np.size(liste), 3))
     fat = np.zeros((np.size(liste), np.size(liste), 3))
     for j,i in enumerate(liste):
@@ -290,20 +290,25 @@ if __name__ == "__main__":
         result[j,:,:], fat[j,:,:] = alpha(i,liste, cmap = "seismic", save_fig=False, show_fig = False, print_error = False, pi=0.3)
     
     print("Errorrate for TV:")
-    print(np.round(result[:,:,0]*100,2))
+    res1 = np.copy(np.round(result[:,:,0]*100,2))
+    print(res1)
     print("Fat Content for TV:")
-    print(np.round(fat[:,:,0]*100,2))
+    fat1 = np.copy(np.round(fat[:,:,0]*100,2))
+    print(fat1)
     print(25*"-")
     print("Errorrate for LDA:")
-    print(np.round(result[:,:,1]*100,2))
+    res2 = np.copy(np.round(result[:,:,1]*100,2))
+    print(res2)
     print("Fat Content for LDA:")
-    print(np.round(fat[:,:,1]*100,2))
+    fat2 = np.copy(np.round(fat[:,:,1]*100,2))
+    print(fat2)
     print(25*"-")
     print("Errorrate for PI:")
-    print(np.round(result[:,:,2]*100,2))
+    res3 = np.copy(np.round(result[:,:,2]*100,2))
+    print(res3)
     print("Fat Content for PI:")
-    print(np.round(fat[:,:,2]*100,2))
-
+    fat3 = np.copy(np.round(fat[:,:,0]*100,2))
+    print(fat3)
     
     I = np.eye(np.size(liste), dtype=int)
     
@@ -318,6 +323,22 @@ if __name__ == "__main__":
     # print(result[:,:,0])
     print(25*"-")
     print("Mean Errorrates:")
-    print(np.round(np.sum(result*25,axis=1),2))
+    mean_res = np.copy(np.round(np.sum(result*25,axis=1),2))
+    print(mean_res)
     print("Mean Fat Content:")
-    print(np.round(np.sum(fat*25,axis=1),2))
+    mean_fat = np.copy(np.round(np.sum(fat*25,axis=1),2))
+    print(mean_fat)
+
+    # Print result as table
+
+    with open("table_res.txt", "a") as f:
+        for i in range(np.size(liste)):
+            print(r"Qmultirow{3}*{" + str(liste[i]) + r"} & TV & " + " & ".join(str(np.round(res1[i,x],2)) for x in range(np.size(liste))) + " & " + str(np.round(mean_res[i,0],2)) + r" QQ", file = f)
+            print(r"& $Qtext{MLD}_{0.5}$ & " + " & ".join(str(np.round(res2[i,x],2)) for x in range(np.size(liste))) + " & " + str(np.round(mean_res[i,1],2)) + r" QQ", file = f)
+            print(r"& $Qtext{MLD}_{0.3}$ & " + " & ".join(str(np.round(res3[i,x],2)) for x in range(np.size(liste))) + " & " + str(np.round(mean_res[i,2],2)) + r" QQ Qhline", file = f)
+
+    with open("table_fat.txt", "a") as f:
+        for i in range(np.size(liste)):
+            print(r"Qmultirow{3}*{1} & TV & " + " & ".join(str(np.round(fat1[i,x],2)) for x in range(np.size(liste))) + " & " + str(np.round(mean_fat[i,0],2)) + r" QQ", file = f)
+            print(r"& $Qtext{MLD}_{0.5}$ & " + " & ".join(str(np.round(fat2[i,x],2)) for x in range(np.size(liste))) + " & " + str(np.round(mean_fat[i,1],2)) + r" QQ", file = f)
+            print(r"& $Qtext{MLD}_{0.3}$ & " + " & ".join(str(np.round(fat3[i,x],2)) for x in range(np.size(liste))) + " & " + str(np.round(mean_fat[i,2],2)) + r" QQ + Qhline", file = f)
