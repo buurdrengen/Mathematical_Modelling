@@ -36,14 +36,21 @@ A, B = constructA(H,K)
 
 myModel = Model(Cbc.Optimizer)
     # If your want ot use GLPK instead use:
-    #myModel = Model(GLPK.Optimizer)
+# myModel = Model(GLPK.Optimizer)
 
 @variable(myModel, x[1:h], Bin )
 @variable(myModel, R[1:h] >= 0 )
+@variable(myModel, t[1:h] >= 0)
+@variable(myModel, y[1:h-1], Bin)
 
-@objective(myModel, Min, sum(x) )
 
-@constraint(myModel, [j=1:h],R[j] >= H[j] + 10 )
+@objective(myModel, Min, sum(t))
+
+@constraint(myModel, y .== x[1:h-1] .+ x[2:h])
+# @constraint(myModel, y .<= 1)
+@constraint(myModel, t .>= R .- B)
+@constraint(myModel, t .>= B .- R)
+@constraint(myModel, R .>= B )
 @constraint(myModel, [i=1:h],R[i] == sum(A[i,j]*x[j] for j=1:h) )
 
 optimize!(myModel)
@@ -57,15 +64,16 @@ else
 end
 
 nR =  JuMP.value.(R)
+nx = JuMP.value.(x)
+sx = sum(nx)
+maximum((nx[1:h-1] .+ nx[2:h]))
 
 new_H = H .- nR
 
-nx = JuMP.value.(x)
-sx = sum(nx)
-
-maximum((nx[1:h-1] .+ nx[2:h]))
+max_h = -10*ones(h)
 
 
-plt = plot(xy,new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom)
+
+plt = plot(xy, new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom)
 plot!(xy,max_h, linecolor = "black", label = "Minimum Depth")
-savefig(plt,"Depression/figures/Opgave2.png")
+savefig(plt,"Depression/figures/Opgave5.png")
