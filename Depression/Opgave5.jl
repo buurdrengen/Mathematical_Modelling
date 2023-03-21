@@ -41,12 +41,10 @@ myModel = Model(Cbc.Optimizer)
 @variable(myModel, x[1:h], Bin )
 @variable(myModel, R[1:h] >= 0 )
 @variable(myModel, t[1:h] >= 0)
-@variable(myModel, y[1:h-1], Bin)
-
 
 @objective(myModel, Min, sum(t))
 
-@constraint(myModel, y .== x[1:h-1] .+ x[2:h])
+@constraint(myModel, 1 .>= x[1:h-1] .+ x[2:h])
 @constraint(myModel, t .>= R .- B)
 @constraint(myModel, t .>= B .- R)
 @constraint(myModel, R .>= B )
