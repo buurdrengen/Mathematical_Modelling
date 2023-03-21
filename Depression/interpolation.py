@@ -20,11 +20,13 @@ h_interp = np.interp(r_interp, r_sum, H) # Interpolate the data with a linear in
 interpData = np.stack((r_interp, h_interp))
 np.savetxt("Depression/channel_data_interp.csv", interpData.T, delimiter=",")
 
-# plt.figure()
-# plt.plot(r_sum, H)
-# plt.plot(r_interp, h_interp)
-# plt.grid()
-# plt.show()
+plt.figure()
+plt.plot(r_sum, H, 'r.', label='Measured Heights')
+plt.plot(r_interp, h_interp, 'b-', label='Intepolated Height Points')
+plt.grid()
+plt.legend()
+plt.savefig('Depression/figures/interpolated_heights.png')
+plt.show()
 
 
 
