@@ -6,8 +6,6 @@ using DataFrames
 using DelimitedFiles
 using Plots
 
-
-
 function constructA(H,K)
     h = length(H)
     k = length(K)-1
@@ -29,26 +27,18 @@ K = [
 300 140 40
 ]
 
-K = [[300 140 40], [ 500 230 60], [1000 400 70 ]]
-
-
-
 df = Array(CSV.read("Depression/channel_data_interp.csv", DataFrame, header = 0))
 xy = df[:,1]
 H = df[:,2]
 h = length(H)
 
-A0, B = constructA(H,K[1])
-A1, _ = constructA(H,K[2])
-A2, _ = constructA(H,K[3])
+A, B = constructA(H,K)
 
 myModel = Model(Cbc.Optimizer)
     # If your want ot use GLPK instead use:
 # myModel = Model(GLPK.Optimizer)
 
-@variable(myModel, x0[1:h], Bin )
-@variable(myModel, x1[1:h], Bin )
-@variable(myModel, x2[1:h], Bin )
+@variable(myModel, x[1:h], Bin )
 @variable(myModel, R[1:h] >= 0 )
 @variable(myModel, t[1:h] >= 0)
 @variable(myModel, y[1:h-1], Bin)
@@ -56,29 +46,26 @@ myModel = Model(Cbc.Optimizer)
 
 @objective(myModel, Min, sum(t))
 
-@constraint(myModel, y .== x0[1:h-1] .+ x0[2:h] .+ x1[1:h-1] .+ x1[2:h] + x2[1:h-1] .+ x2[2:h])
-@constraint(myModel, x0 .+ x1 .+ x2 .<= 1)
+@constraint(myModel, y .== x[1:h-1] .+ x[2:h])
 @constraint(myModel, t .>= R .- B)
 @constraint(myModel, t .>= B .- R)
 @constraint(myModel, R .>= B )
-@constraint(myModel, [i=1:h],R[i] == sum(A0[i,j]*x0[j] .+ A1[i,j]*x1[j] + A2[i,j]*x2[j] for j=1:h))
-
-set_optimizer_attribute(myModel, "maxNodes", 1000000)
-set_optimizer_attribute(myModel, "threads", 16)
+@constraint(myModel, [i=1:h],R[i] == sum(A[i,j]*x[j] for j=1:h) )
 
 optimize!(myModel)
 
-if termination_status(myModel) == MOI.OPTIMAL || termination_status(myModel) == MOI.NODE_LIMIT
+if termination_status(myModel) == MOI.OPTIMAL
     println("Objective value: ", JuMP.objective_value(myModel))
+    println("x = ", JuMP.value.(x))
+    println("R = ", JuMP.value.(R))
 else
     println("Optimize was not succesful. Return code: ", termination_status(myModel))
 end
 
 nR =  JuMP.value.(R)
-nx0 = JuMP.value.(x0)
-nx1 = JuMP.value.(x1)
-nx2 = JuMP.value.(x2)
-sx = sum(nx0 .+ nx1 .+ nx2)
+nx = JuMP.value.(x)
+sx = sum(nx)
+maximum((nx[1:h-1] .+ nx[2:h]))
 
 new_H = H .- nR
 
