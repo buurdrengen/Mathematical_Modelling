@@ -30,7 +30,7 @@ function constructA(H,K)
     
     A = A[:,k+1:end-k]
 
-    B = H + 10
+    B = H .+ 10
 
     # Make a function that returns A when given H and K
     return A, B
