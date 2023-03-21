@@ -27,6 +27,7 @@ plt.grid()
 plt.legend()
 plt.ylabel('Height [m]')
 plt.xlabel('Distance Along Channel [km]')
+plt.title('Interpolated Heights')
 plt.savefig('Depression/figures/interpolated_heights.png')
 plt.show()
 
