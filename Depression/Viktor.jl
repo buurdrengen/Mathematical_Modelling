@@ -4,7 +4,7 @@ using GLPK, Cbc, JuMP, SparseArrays
 using CSV
 using DataFrames
 using DelimitedFiles
-using Plots
+using PlotlyBase, PlotlyJS
 
 function constructA(H,K)
     h = length(H)
@@ -40,11 +40,14 @@ myModel = Model(Cbc.Optimizer)
 
 @variable(myModel, x[1:h], Bin )
 @variable(myModel, R[1:h] >= 0 )
+@variable(myModel, t[1:h] >= 0)
 
-@objective(myModel, Min, abs(R .- B) )
+@objective(myModel, Min, sum(t))
 
-@constraint(myModel, [j=1:h],R[j] >= H[j] + 10 )
-@constraint(myModel, [i=1:h],R[i] == sum(A[i,j]*x[j] for j=1:h) )
+@constraint(myModel, [j=1:h], t[j] >= R[j] - B[j])
+@constraint(myModel, [j=1:h], t[j] >= B[j] - R[j])
+@constraint(myModel, [j=1:h], R[j] >= H[j] + 10 )
+@constraint(myModel, [i=1:h], R[i] == sum(A[i,j]*x[j] for j=1:h) )
 
 optimize!(myModel)
 
@@ -62,6 +65,17 @@ new_H = H .- nR
 
 max_h = -10*ones(h)
 
-plt = plot(xy,new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom)
-plot!(xy,max_h, linecolor = "black", label = "Minimum Depth")
-savefig(plt,"Opgave2.png")
+
+
+explosion_emoji = PlotlyBase.get_plotschema().traces[:scatter][:attributes][:marker][:symbol][:values][218]
+Bomb_index = Bool.(JuMP.value.(x))
+lineplot = scatter(x=xy, y=H)
+trace = scatter(
+    x=xy[Bomb_index], y=H[Bomb_index], mode="markers",
+    marker=attr(
+        symbol=raw_symbols[218],
+        line=attr(width=2, color="black"),
+        color="yellow", size=10
+        )
+        )
+plot([lineplot, trace])
