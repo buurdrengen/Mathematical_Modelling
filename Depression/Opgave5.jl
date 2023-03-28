@@ -71,6 +71,6 @@ max_h = -10*ones(h)
 
 
 
-plt = plot(xy, new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom)
+plt = plot(xy, new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom, markercolor = :red, markershape = :circle, markersize = 2)
 plot!(xy,max_h, linecolor = "black", label = "Minimum Depth")
 savefig(plt,"Depression/figures/Opgave5.png")
