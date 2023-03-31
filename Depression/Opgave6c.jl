@@ -34,11 +34,9 @@ K = [[150 70 25], [300 140 40], [ 500 230 60], [1000 400 70 ]]
 
 df = Array(CSV.read("Depression/channel_data_interp.csv", DataFrame, header = 0))
 
-n = 100
-
-H = df[1:n,2]
+H = df[:,2]
 h = length(H)
-xy = df[1:n,1]
+xy = df[:,1]
 
 
 A0, B = constructA(H,K[1])
@@ -68,9 +66,10 @@ myModel = Model(Cbc.Optimizer)
 @constraint(myModel, R .>= B )
 @constraint(myModel, [i=1:h],R[i] == sum(A0[i,j]*x0[j] .+ A1[i,j]*x1[j] .+ A2[i,j]*x2[j] .+ A3[i,j]*x3[j] for j=1:h))
 
+    set_optimizer_attribute(myModel, "seconds", 3600 * 10 * 24)
 # set_optimizer_attribute(myModel, "maxNodes", 1000000)
-set_optimizer_attribute(myModel, "threads", 16)
-set_optimizer_attribute(myModel, "logLevel", 0)
+set_optimizer_attribute(myModel, "threads", 24)
+# set_optimizer_attribute(myModel, "logLevel", 0)
 
 JuMP.optimize!(myModel)
 
@@ -80,23 +79,31 @@ else
     println("Optimize was not succesful. Return code: ", termination_status(myModel))
 end
 
-tt = JuMP.solve_time(myModel)
-objective = JuMP.objective_value(myModel)
-nbombs = sum(JuMP.value.(x0) .+ JuMP.value.(x1) .+ JuMP.value.(x2) .+ JuMP.value.(x3))
 
 # nR =  JuMP.value.(R)
+
+open("summaryc.txt", "w") do f
+    print(f,solution_summary(myModel))
+end
 
 nR =  JuMP.value.(R)
 nx0 = JuMP.value.(x0)
 nx1 = JuMP.value.(x1)
 nx2 = JuMP.value.(x2)
-sx = sum(nx0 .+ nx1 .+ nx2)
+nx3 = JuMP.value.(x3)
+sx = sum(nx0 .+ nx1 .+ nx2 + nx3)
 new_H = H .- nR
+
+println("Very Low Yield: ", sum(nx0))
+println("Low Yield:      ", sum(nx1))
+println("Medium Yield:   ", sum(nx2))
+println("High Yield:     ", sum(nx3))
+println("Total:          ", sx)
 
 max_h = -10*ones(h)
 
-
-
 plt = plot(xy, new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom, markercolor = :red, markershape = :circle, markersize = 2)
 plot!(xy,max_h, linecolor = "black", label = "Minimum Depth")
-# savefig(plt,"Depression/figures/Opgave6.png")
+savefig(plt,"Depression/figures/Opgave6c.png")
+
+writedlm("resultc.txt", [transpose(nR), transpose(nx0), transpose(nx1), transpose(nx2), transpose(nx3)], ",")

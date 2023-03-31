@@ -60,7 +60,7 @@ myModel = Model(Cbc.Optimizer)
 @constraint(myModel, [i=1:h],R[i] == sum(A0[i,j]*x0[j] .+ A1[i,j]*x1[j] for j=1:h))
 
 # set_optimizer_attribute(myModel, "maxNodes", 1000000)
-set_optimizer_attribute(myModel, "threads", 16)
+set_optimizer_attribute(myModel, "threads", 24)
 
 JuMP.optimize!(myModel)
 
@@ -81,7 +81,9 @@ new_H = H .- nR
 
 max_h = -10*ones(h)
 
-
+open("summaryd.txt", "w") do f
+    print(f,solution_summary(myModel))
+end
 
 plt = plot(xy, new_H, title = "Depth of Channel", label = "Channel", ylabel = "Depth [m]", xlabel = "Distance from Ocean [km]", legend = :bottom, markercolor = :red, markershape = :circle, markersize = 2)
 plot!(xy,max_h, linecolor = "black", label = "Minimum Depth")
