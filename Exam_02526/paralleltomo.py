@@ -176,14 +176,16 @@ def paralleltomo(*args):
     
     return [A,theta,p,d]
 
-import numpy as np
-N=8
-theta = np.matrix([45.0000,   67.5000,   90.0000,  112.5000,  135.0000,  157.5000,  180.0000,  202.5000,  225.0000,  247.5000,  270.0000, 292.5000,  315.0000])
-[A,theta,p,d] = paralleltomo(N,theta,11)
 
-np.linalg.matrix_rank(A)
+if __name__ == "__main__":
+    import numpy as np
+    N=8
+    theta = np.matrix([45.0000,   67.5000,   90.0000,  112.5000,  135.0000,  157.5000,  180.0000,  202.5000,  225.0000,  247.5000,  270.0000, 292.5000,  315.0000])
+    [A,theta,p,d] = paralleltomo(N,theta,11)
 
-N=200
-theta =np.matrix(np.linspace(0,179,179))
-p = 250
-[A,theta,p,d] = paralleltomo(N,theta,p)
+    np.linalg.matrix_rank(A)
+
+    N=200
+    theta =np.matrix(np.linspace(0,179,179))
+    p = 250
+    [A,theta,p,d] = paralleltomo(N,theta,p)

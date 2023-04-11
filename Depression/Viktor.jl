@@ -67,15 +67,14 @@ max_h = -10*ones(h)
 
 
 
-explosion_emoji = PlotlyBase.get_plotschema().traces[:scatter][:attributes][:marker][:symbol][:values][218]
 Bomb_index = Bool.(JuMP.value.(x))
 lineplot = scatter(x=xy, y=H)
 trace = scatter(
     x=xy[Bomb_index], y=H[Bomb_index], mode="markers",
     marker=attr(
-        symbol=raw_symbols[218],
-        line=attr(width=2, color="black"),
-        color="yellow", size=10
+        symbol="18",
+        line=attr(width=0.4, color="black"),
+        color="yellow", size=4
         )
         )
 plot([lineplot, trace])

@@ -13,7 +13,6 @@ r = r_earth*np.sqrt(delta_phi**2 + delta_theta**2) # [km] - NOT A PERFECT EQUATI
 r_sum = np.cumsum(r) # [km] Get the difference between points
 r_sum = np.append(0, r_sum) # [km] append 0 to the list so that the range corresponds to the distance from start point
 
-
 r_interp = np.arange(0, np.max(r_sum), 0.25) #[km] Create the axis which we want our function interpolated to.
 h_interp = np.interp(r_interp, r_sum, H) # [m] Interpolate the data with a linear interpolation
 
