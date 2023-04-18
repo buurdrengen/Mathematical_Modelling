@@ -171,7 +171,7 @@ def paralleltomo(*args):
     vals = vals[0:idxend]
     
     # Create sparse matrix A from the stored values.
-    A = csr_matrix((vals[:,0].astype(np.float), (np.squeeze(np.array(rows[:,0]).astype(int)), np.squeeze(np.array(cols[:,0]).astype(int)))), dtype=np.float, shape=(p*nA, N**2)).toarray()
+    A = csr_matrix((vals[:,0].astype(np.float), (np.squeeze(np.array(rows[:,0]).astype(int)), np.squeeze(np.array(cols[:,0]).astype(int)))), dtype=float, shape=(p*nA, N**2)).toarray()
 
     
     return [A,theta,p,d]
