@@ -13,13 +13,13 @@ start = time.time()
 data = np.array(scipy.io.loadmat("Exam_02526/testImage.mat")['im']) #Pixel size: 0.1 mm, 5000x5000 pixels
 
 # Load a resolution list
-res_list = np.array([200])
+res_list = np.array([50])
 N_outer = np.size(res_list)
 
 # Create a meshgrid for the internal colormaps
-n = 50
+n = 25
 theta_res_list = np.linspace(1,180,n) # np.array([1, 2, 3, 4, 5, 6])
-p_list = np.arange(1,n)*3 # np.array([30,40,50, 60, 70, 80, 90, 100])
+p_list = np.arange(1,n)*10 # np.array([30,40,50, 60, 70, 80, 90, 100])
 meshgrid_inner = np.meshgrid(theta_res_list, p_list)
 theta_mesh = meshgrid_inner[0].flatten()
 p_mesh = meshgrid_inner[1].flatten()
@@ -82,11 +82,11 @@ ax[0].set_ylabel(f"No. of Rays") # Create the resolution label
 fig.colorbar(im, ax=ax)
 
 mdict = {"matrix_cond": matrix_cond, "label": "matrix_cond"}
-scipy.io.savemat("N25-data",mdict)
+scipy.io.savemat("N100-data.mat",mdict)
 
 
 plt.draw()
-plt.savefig("N25-plot",dpi=300,format="png")
+plt.savefig("N100-plot.png",dpi=300,format="png")
 plt.show()
 
 
