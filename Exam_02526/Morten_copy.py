@@ -11,9 +11,9 @@ import time
 
 # Define the perbuations
 # noise = 8e-5
-angle_no = 180
-p = 225
-res = 100 # The picture will be (res x res)
+angle_no = 90
+p = 120
+res = 50 # The picture will be (res x res)
 sample_size = 20
 confidence = 2
 
@@ -43,12 +43,17 @@ downsized_known_lead = np.ceil(downsized_known_lead).astype(int) # Any cell cont
 downsized_known_iron = np.ceil(downsized_known_iron).astype(int) # Any cell containing iron will be treated as iron
 downsized_known_wood = np.floor(downsized_known_wood + 0.01).astype(int) # Any cell containing at least 99% wood will be treated as wood
 
-# fig, ax = plt.subplots(figsize = [12,8], ncols=3, nrows=2, layout='constrained')
-# ax[0,0].imshow(downsized_known_wood)
-# ax[0,1].imshow(downsized_known_iron)
-# ax[0,2].imshow(downsized_known_lead)
-# plt.show()
-
+# Find the separators based on the anotted masks
+x_imShape = x.reshape(np.shape(downsized_im)) 
+# Define the attenuation coefficient means and find the separators betweeen classes
+air_mean = 0
+tree_mean = np.mean(x_imShape[downsized_known_wood == 1])
+iron_mean = np.mean(x_imShape[downsized_known_iron == 1])
+lead_mean = np.mean(x_imShape[downsized_known_lead == 1]) 
+# Find the point where the classes have equal probability of being
+air_tree_separator = (air_mean + tree_mean)/2
+tree_iron_separator = (tree_mean + iron_mean)/2
+iron_lead_separator = (iron_mean + lead_mean)/2
 
 # number of each cell
 N_lead = np.sum(downsized_known_lead)
@@ -77,18 +82,7 @@ for i, noise in enumerate(error_list):
 
         # Find the perturbed attenuation coefficients
         x_new = solve(A.T @ A, A.T @ b_perturbed, assume_a = "her")
-        x_new = x_new.reshape(np.shape(downsized_im))
-
-        # Define the attenuation coefficient means and find the separators betweeen classes
-        air_mean = 0
-        tree_mean = np.mean(x_new[downsized_known_wood == 1])
-        iron_mean = np.mean(x_new[downsized_known_iron == 1])
-        lead_mean = np.mean(x_new[downsized_known_lead == 1]) 
-
-        # Find the point where the classes have equal probability of being
-        air_tree_separator = (air_mean + tree_mean)/2
-        tree_iron_separator = (tree_mean + iron_mean)/2
-        iron_lead_separator = (iron_mean + lead_mean)/2
+        x_new = x_new.reshape(np.shape(downsized_im)) 
 
         # Find the index for the different classes
         air_index =                                 (x_new < air_tree_separator)
@@ -104,7 +98,7 @@ for i, noise in enumerate(error_list):
         if (wood_error > 0) & (failed_to_detect_wood == -1): failed_to_detect_wood = noise; print(f"FAIL: (at {i}) Failed To Detect Wood...")
         if (lead_error + iron_error > 0) & (failed_to_detect_metal == -1): failed_to_detect_metal = noise; print(f"FAIL: (at {i}) Failed To Detect Metal...")
 
-    print(f"Error[{i}] is {np.mean(wood_errors[i,:])} pm {np.std(wood_errors[i,:])}")
+    print(f"Error[{i}] is {np.mean(wood_errors[i,:])} pm {confidence*np.std(wood_errors[i,:])}")
 
 t1 = time.time()
 print(f"Time is {t1 - t0} seconds")
