@@ -48,9 +48,9 @@ def phantom_plank(phantom_size, angle = 0, p = 1, v0 = None, ring_width = 1, y1 
     
     
     
-    m = np.int(np.ceil(t/p))
-    n = np.int(np.ceil(w/p))
-    o = np.int(np.ceil(l/p))
+    m = int(np.ceil(t/p))
+    n = int(np.ceil(w/p))
+    o = int(np.ceil(l/p))
         
     phantom = np.zeros((m,n,o), dtype = 'float32')
     

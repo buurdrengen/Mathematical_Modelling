@@ -6,7 +6,7 @@ Created on Tue Sep 29 09:16:42 2020
 @author: bossema
 """
 
-
+print("Tester")
 import numpy as np
 from plank_phantom import phantom_plank
 import line_geometry as lg
@@ -15,20 +15,23 @@ from flexdata import display
 from flexdata import data
 from flextomo import projector
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('qtagg')
+import os
 #%%
 variable = 'angles'
 ringwidths = np.array([1.0])
 
 angles = np.array([0, 8,15])
 #%% static parameters
-save_path = '/export/scratch2/bossema/results/linear_dendro/publication/simulations/'
+save_path = '/home/morten/Dokumenter/DTU/simulations/'
 sod = 200 #in mm
 odd = 400 # in mm
 
 bb = 2 #detector binning
 det_pixel = 0.1*bb
-det_width = np.int(np.ceil(1944/bb)) #pixels
-det_height = np.int(np.ceil(1536/bb))
+det_width = int(np.ceil(1944/bb)) #pixels
+det_height = int(np.ceil(1536/bb))
 
 pix_size = 0.05
 vox_size = 0.05
@@ -59,7 +62,8 @@ for j, ring_width in enumerate(ringwidths):
         #create phantom with tree ring size
         P = phantom_plank(phantom_size, angle = np.deg2rad(angle), p = pix_size, ring_width = ring_width, gaussian_blurr = 2).transpose([0,2,1])
         image = P[:,0,:]
-        plt.imsave(save_path +'phantoms/'+ name+'.png', image, vmin = -1, vmax =2, cmap = 'gray')
+        print(os.path.join(save_path,'phantoms/', name+'.png'))
+        plt.imsave(os.path.join(save_path,'phantoms/', name+'.png'), image, vmin = -1, vmax =2, cmap = 'gray')
         display.slice(P, title = 'Phantom', dim = 1, index = 0)
 
 
