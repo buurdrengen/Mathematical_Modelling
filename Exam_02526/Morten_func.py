@@ -10,7 +10,7 @@ import time
 import seaborn as sns
 
 
-def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = [1e-4, 1e-3], 
+def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = [1e-4, 1e-3], noise_size = 40,
                 class_errors=False):
     downsized_pixel_size = 5000/res * 0.1
     # Load the image with lead and steel shot
@@ -29,13 +29,13 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
     downsized_im = block_reduce(data, block_size=(downsizing, downsizing), func=np.mean) # downsample the image
     x = np.copy(downsized_im.flatten()) # flatten the attenuation constants
 
-    downsized_known_wood = block_reduce(known_wood, block_size=(downsizing, downsizing), func=np.mean) # downsample the image
-    downsized_known_iron = block_reduce(known_iron, block_size=(downsizing, downsizing), func=np.mean) # downsample the image
-    downsized_known_lead = block_reduce(known_lead, block_size=(downsizing, downsizing), func=np.mean) # downsample the image
+    downsized_known_wood = block_reduce(known_wood, block_size=downsizing, func=np.min).astype(int) # downsample the image
+    downsized_known_iron = block_reduce(known_iron, block_size=downsizing, func=np.max).astype(int) # downsample the image
+    downsized_known_lead = block_reduce(known_lead, block_size=downsizing, func=np.max).astype(int) # downsample the image
 
-    downsized_known_lead = np.ceil(downsized_known_lead).astype(int) # Any cell containing lead will be treated as lead
-    downsized_known_iron = np.ceil(downsized_known_iron).astype(int) # Any cell containing iron will be treated as iron
-    downsized_known_wood = np.floor(downsized_known_wood + 0.01).astype(int) # Any cell containing at least 99% wood will be treated as wood
+    # downsized_known_lead = np.ceil(downsized_known_lead).astype(int) # Any cell containing lead will be treated as lead
+    # downsized_known_iron = np.ceil(downsized_known_iron).astype(int) # Any cell containing iron will be treated as iron
+    # downsized_known_wood = np.floor(downsized_known_wood + 0.01).astype(int) # Any cell containing at least 99% wood will be treated as wood
 
     # Find the separators based on the anotted masks
     x_imShape = x.reshape(np.shape(downsized_im)) 
@@ -54,6 +54,7 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
     N_iron = np.sum(downsized_known_iron)
     N_wood = np.sum(downsized_known_wood)
 
+    
     print(f"the resolution of the image is {np.shape(downsized_im)}")
 
     # Initialize system matrix and stuff
@@ -66,7 +67,7 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
     # Load simulated forward projection 
     b = A @ x # Finding bj
     t0 = time.time()
-    error_list = np.linspace(noise_limit[0], noise_limit[1], 41)
+    error_list = np.linspace(noise_limit[0], noise_limit[1], noise_size)
     wood_errors = np.zeros([np.size(error_list),sample_size])
     failed_to_detect_wood = -1
     failed_to_detect_metal = -1
@@ -179,6 +180,8 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
             xticklabels=['Wood', 'Iron', 'Lead'],
             yticklabels=['Wood', 'Iron', 'Lead']
         )
+
+        plt.savefig(f"Exam_02526/img/confusion{res}.png", dpi=300)
         ax3.set_ylabel('Real Class')
         ax3.set_xlabel('Modelled Class')
         ax3.set_title('Confusion Matrix')
@@ -203,6 +206,6 @@ if __name__ == '__main__':
     res = 100 # The picture will be (res x res)
     sample_size = 20
     confidence = 2
-    morten_func(angle_no=angle_no, p=p, res=res, confidence=confidence, sample_size=sample_size, class_errors=True)
+    morten_func(angle_no=angle_no, p=p, res=res, confidence=confidence, sample_size=sample_size, class_errors=True, noise_limit=[2e-6,1e-3], noise_size=50)
 
 
