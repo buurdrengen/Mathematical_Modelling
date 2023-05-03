@@ -12,7 +12,7 @@ import seaborn as sns
 
 def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = [1e-4, 1e-3], 
                 class_errors=False):
-        
+    downsized_pixel_size = 5000/res * 0.1
     # Load the image with lead and steel shot
     data = np.array(loadmat("Exam_02526/testImage.mat")['im']) #Pixel size: 0.1 mm, 5000x5000 pixels
     # data[data == np.unique(data)[[1]]] = 0.1*1e-2 # Change the tree attenuation
@@ -72,6 +72,7 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
     failed_to_detect_metal = -1
     for i, noise in enumerate(error_list):
         for j in range(sample_size):
+            np.random.seed(j)
             b_perturbed = b + np.random.normal(0, noise, size=np.shape(b)) # adding noise
 
             # Find the perturbed attenuation coefficients
@@ -128,27 +129,46 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
     plt.tick_params(labelsize=11)
     plt.legend(fontsize=12)
     plt.grid()
-    plt.title(f'Resolution: {res}X{res}\nSetup: {p} Rays, {angle_no} Angles and {sample_size} Samples', fontsize=16)
+    plt.title(f'Resolution: {downsized_pixel_size}X{downsized_pixel_size} [mm]\nSetup: {p} Rays, {angle_no} Angles and {sample_size} Samples', fontsize=16)
     plt.savefig(f"Exam_02526/img/res{res}.png", dpi=300)
     
 
     if class_errors==True:
             
         # Define a class tree to store the different classes identified. These are created from the last noise level.
-        class_tree = np.zeros(np.shape(x_new))
-        class_tree[air_index] = 1
+        class_tree = np.ones(np.shape(x_new))
         class_tree[tree_index] = 2
         class_tree[iron_index] = 3
         class_tree[lead_index] = 4
+        class_tree_true = np.ones(np.shape(x_new))
+        class_tree_true[downsized_known_wood==1] = 2
+        class_tree_true[downsized_known_iron==1] = 3
+        class_tree_true[downsized_known_lead==1] = 4
+        
 
-        fig, (ax1, ax2, ax3) = plt.subplots(ncols=3)
-        ax1.imshow(class_tree)
+        # Define a confusion matrix to be used for plotting
         confusion_matrix = np.array([
             [wood_as_wood, wood_as_iron, wood_as_lead]/N_wood,
             [iron_as_wood, iron_as_iron, iron_as_lead]/N_iron,
             [lead_as_wood, lead_as_iron, lead_as_lead]/N_lead
         ])
-        ax2.imshow(downsized_im)
+
+        fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12,4))
+        cmap = plt.get_cmap('viridis', 4) # Define the colormap
+        im = ax1.imshow(class_tree, cmap=cmap, vmin=0.5, vmax=4.5)
+        im = ax2.imshow(class_tree_true, cmap=cmap, vmin=0.5, vmax=4.5)
+        fig.suptitle(f'Classification Comparison of Noise: {noise_limit[1]}')
+        ax1.set_title('Modelled Classes')
+        ax2.set_title('Real Classes')
+
+        fig.subplots_adjust(right=0.8)
+        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+        cbar = fig.colorbar(im, cax=cbar_ax, ticks=[1, 2, 3, 4]) # Define colorbar
+        cbar.ax.set_yticklabels(['Air', 'Tree', 'Iron', 'Lead']) # Define tick labels
+        plt.savefig(f"Exam_02526/img/classification_{res}.png")
+
+
+        fig, ax3 = plt.subplots()
         sns.heatmap(
             confusion_matrix*100, 
             annot=True, 
@@ -156,10 +176,13 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
             ax=ax3, 
             linewidths=.05, 
             cbar_kws={'label':'Error Rate [%]'},
-            xticklabels=['wood', 'iron', 'lead'],
-            yticklabels=['wood', 'iron', 'lead']
+            xticklabels=['Wood', 'Iron', 'Lead'],
+            yticklabels=['Wood', 'Iron', 'Lead']
         )
-
+        ax3.set_ylabel('Real Class')
+        ax3.set_xlabel('Modelled Class')
+        ax3.set_title('Confusion Matrix')
+        plt.savefig(f"Exam_02526/img/confusion_{res}.png")
 
     plt.show()
 
@@ -175,9 +198,9 @@ def morten_func(angle_no, p, res, confidence = 2, sample_size=20, noise_limit = 
 if __name__ == '__main__':
     # Define the perbuations
     # noise = 8e-5
-    angle_no = 45
-    p = 55
-    res = 25 # The picture will be (res x res)
+    angle_no = 180
+    p = 225
+    res = 100 # The picture will be (res x res)
     sample_size = 20
     confidence = 2
     morten_func(angle_no=angle_no, p=p, res=res, confidence=confidence, sample_size=sample_size, class_errors=True)
