@@ -15,20 +15,22 @@ from flexdata import display
 from flexdata import data
 from flextomo import projector
 import matplotlib.pyplot as plt
+import time
+start = time.time()
 #%%
 variable = 'angles'
 ringwidths = np.array([1.0])
 
-angles = np.array([0, 8,15])
+angles = np.array([0])
 #%% static parameters
-save_path = '/export/scratch2/bossema/results/linear_dendro/publication/simulations/'
+save_path = 'Exam_02526/advanced_tree/'
 sod = 200 #in mm
 odd = 400 # in mm
 
 bb = 2 #detector binning
 det_pixel = 0.1*bb
-det_width = np.int(np.ceil(1944/bb)) #pixels
-det_height = np.int(np.ceil(1536/bb))
+det_width = int(np.ceil(1944/bb)) #pixels
+det_height = int(np.ceil(1536/bb))
 
 pix_size = 0.05
 vox_size = 0.05
@@ -49,6 +51,7 @@ print(source_range)
 geom = lg.line_geometry(sod, odd, det_pixel, pix_size, source_range, det_range, plot = False)
 n_proj = int(np.ceil(lg.system_details(geom, phantom_size, det_width)))*2
 
+
 #%%
 
 
@@ -61,6 +64,7 @@ for j, ring_width in enumerate(ringwidths):
         image = P[:,0,:]
         plt.imsave(save_path +'phantoms/'+ name+'.png', image, vmin = -1, vmax =2, cmap = 'gray')
         display.slice(P, title = 'Phantom', dim = 1, index = 0)
+        print(f"time passed: {time.time()-start}")
 
 
     
