@@ -24,7 +24,7 @@ def phantom(n_lead, n_steel, ring_count=50, wood_type = 'Beech', N=5000, r=20, i
         raise Exception(f'Coefficient for Wood Type {wood_type} is not defined!')
             
     # Define other parameters
-    alpha = [2*alpha_wood[wood_type]/3, 4*alpha_wood[wood_type]/3, 1.5e-1, 3.43] # Attenuation constants: [light wood, dark wood, iron ,lead]
+    alpha = [2*alpha_wood[wood_type]/3, 4*alpha_wood[wood_type]/3, 6.5e-1, 3.43] # Attenuation constants: [light wood, dark wood, iron ,lead]
     sigma = N/(4*inv_sigma_log*ring_count) # Standard deviation of Gaussian Blur
     
     # Create the log
