@@ -9,7 +9,9 @@ angle_no = 25 # Define the number of angles to be used in paralleltomo.
 p = 55 # Define the number of rays to be used in paralleltomo.
 res = 25 # The picture will be (res x res). pixelwidth is (500/res mm)
 vol_pellet = 0.5 # Define how much of the pellet is inside the slice
-tree_type = 'Beech' # can be 'beech'/'fir'
+tree_type = 'Fir' # can be 'beech'/'fir'
+tree_ring_no = 10
+noise_lim = [2.5e-10, 1e-1]
 
 #%%
 # Load start time
@@ -26,7 +28,7 @@ elif tree_type == 'Fir':
 
 # Define the attenuation coefficients that are inside the slice
 x_steel_found = vol_pellet*x_steel + (1-vol_pellet)*x_tree
-x_lead_found = vol_pellet*x_lead + (1-vol_pellet)*x_lead
+x_lead_found = vol_pellet*x_lead + (1-vol_pellet)*x_tree
 
 # Define the pixel_width to be used for defining classification thresholds in image.
 pixel_width = 500/res # [mm]
@@ -35,8 +37,8 @@ print(f"the size of the pixels in the image is {pixel_width} mm")
 # Find the attenuation coefficients within the tree
 air_mean = 0
 tree_mean = x_tree*pixel_width/0.1
-steel_mean = (np.square(2)*x_steel + np.square(pixel_width)*x_tree)/np.square(pixel_width)*pixel_width/0.1
-lead_mean = (np.square(pixel_width)*x_lead + np.square(pixel_width)*x_tree)/np.square(pixel_width)*pixel_width/0.1
+steel_mean = (np.square(2)*x_steel + np.square(pixel_width-2)*x_tree)/np.square(pixel_width)*pixel_width/0.1
+lead_mean = (np.square(2)*x_lead + np.square(pixel_width-2)*x_tree)/np.square(pixel_width)*pixel_width/0.1
 
 # Find the point where the classes have equal probability of being
 air_tree_separator = (air_mean + tree_mean)/2
@@ -54,9 +56,10 @@ final_func(angle_no,
             tree_steel_separator, 
             steel_lead_separator, 
             class_errors=True,
-            sample_size=10,
+            sample_size=20,
             tree_type=tree_type,
-            noise_limit=[2.5e-5, 1e-3]
+            noise_limit=noise_lim,
+            ring_count = tree_ring_no
             )
 
 plt.show()

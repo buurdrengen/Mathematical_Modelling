@@ -8,7 +8,9 @@ def final_func(angle_no,
                 noise_limit = [1e-4, 1e-3], 
                 noise_size = 40, 
                 class_errors=True,
-                tree_type = 'beech'):
+                tree_type = 'beech',
+                ring_count = 10,
+                vol_pellet=1):
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.io import loadmat
@@ -19,12 +21,12 @@ def final_func(angle_no,
     from phanton_generator import phantom
 
     # Load the image with lead and steel shot
-    data = phantom(2,2, ring_count=1, wood_type=tree_type) #Pixel size: 0.1 mm, 5000x5000 pixels
+    data = phantom(2,2, ring_count=ring_count, wood_type=tree_type) #Pixel size: 0.1 mm, 5000x5000 pixels
 
     base_array = np.zeros(np.shape(data))   
-    known_wood = np.copy(base_array); known_wood[data == np.unique(data)[[1]]] = 1
-    known_iron= np.copy(base_array); known_iron[data == np.unique(data)[[2]]] = 1
-    known_lead = np.copy(base_array); known_lead[data == np.unique(data)[[3]]] = 1
+    known_wood = np.copy(base_array); known_wood[(data > 0) & (data < 6.5e-1)] = 1
+    known_iron= np.copy(base_array); known_iron[data == 6.5e-1] = 1
+    known_lead = np.copy(base_array); known_lead[data == 3.43] = 1
 
     # Downsample image
     downsizing = int(5e3/res) # define downsizing constant
@@ -118,7 +120,7 @@ def final_func(angle_no,
     plt.legend(fontsize=12)
     plt.grid()
     plt.title(f'Resolution: {500/res}X{500/res} [mm]\nSetup: {p} Rays, {angle_no} Angles and {sample_size} Samples', fontsize=16)
-    plt.savefig(f"Exam_02526/img/res{res}.png", dpi=300)
+    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}.png", dpi=300)
     
 
     if class_errors==True:
@@ -153,7 +155,7 @@ def final_func(angle_no,
         cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
         cbar = fig.colorbar(im, cax=cbar_ax, ticks=[1, 2, 3, 4]) # Define colorbar
         cbar.ax.set_yticklabels(['Air', 'Tree', 'Iron', 'Lead']) # Define tick labels
-        plt.savefig(f"Exam_02526/img/classification_{res}.png")
+        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}.png")
 
 
         fig, ax3 = plt.subplots()
@@ -168,9 +170,8 @@ def final_func(angle_no,
             yticklabels=['Wood', 'Iron', 'Lead']
         )
 
-        plt.savefig(f"Exam_02526/img/confusion{res}.png", dpi=300)
         ax3.set_ylabel('Real Class')
         ax3.set_xlabel('Modelled Class')
         ax3.set_title('Confusion Matrix')
-        plt.savefig(f"Exam_02526/img/confusion_{res}.png")
+        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}.png", dpi=300)
 
