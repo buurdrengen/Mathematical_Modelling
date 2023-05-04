@@ -62,7 +62,7 @@ def phantom(n_lead, n_steel, ring_count=50, N=5000, r=20, inv_sigma_ring = 1.25,
     return img
     
 if __name__ == "__main__":
-    im = phantom(2,2, ring_count = 50)
-    mdict = {'im': im}
-    savemat("new_testimage.mat",mdict, do_compression=True)
+    im = phantom(2,2, ring_count = 50, plot = True)
+    # mdict = {'im': im}
+    # savemat("new_testimage.mat",mdict, do_compression=True)
     
