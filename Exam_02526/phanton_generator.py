@@ -18,9 +18,10 @@ def phantom(n_lead, n_steel, ring_count=50, N=5000, r=20, inv_sigma_ring = 1.25,
     d = N/(2*inv_sigma_ring*ring_count)
     variation = np.random.uniform(-d,d,ring_count)
     rings[1:] += variation; rings[-1] = 0
+    a_wood = 1.2e-2
     
     # Define other parameters
-    alpha = [1.2e-2, 2.4e-2, 23.7e-2, 113e-2] # Attenuation constants
+    alpha = [2*a_wood/3, 4*a_wood/3, 23.7e-2, 113e-2] # Attenuation constants: [light wood, dark wood, iron ,lead]
     sigma = N/(4*inv_sigma_log*ring_count) # Standard deviation of Gaussian Blur
     
     # Create the log
