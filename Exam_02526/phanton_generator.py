@@ -5,7 +5,7 @@ from scipy.io import savemat
 from scipy.ndimage import gaussian_filter
 import time
 
-def phantom(n_lead, n_steel, ring_count=50, N=5000, r=20, inv_sigma_ring = 1.25, inv_sigma_log=4, plot = False, seed = 785462783):
+def phantom(n_lead, n_steel, ring_count=50, wood_type = 'Beech', N=5000, r=20, inv_sigma_ring = 1.25, inv_sigma_log=4, plot = False, seed = 785462783):
     print("Generating Phantom... ", end='', flush=True)
     t =  time.time()
     shape = (N,N)
@@ -18,10 +18,13 @@ def phantom(n_lead, n_steel, ring_count=50, N=5000, r=20, inv_sigma_ring = 1.25,
     d = N/(2*inv_sigma_ring*ring_count)
     variation = np.random.uniform(-d,d,ring_count)
     rings[1:] += variation; rings[-1] = 0
-    a_wood = 1.2e-2
-    
+    alpha_wood = {'Beech': 2.5e-3, 'Fir': 1.7e-3}
+    # Check wood type
+    if not wood_type in alpha_wood.keys():
+        raise Exception(f'Coefficient for Wood Type {wood_type} is not defined!')
+            
     # Define other parameters
-    alpha = [2*a_wood/3, 4*a_wood/3, 23.7e-2, 113e-2] # Attenuation constants: [light wood, dark wood, iron ,lead]
+    alpha = [2*alpha_wood[wood_type]/3, 4*alpha_wood[wood_type]/3, 1.5e-1, 3.43] # Attenuation constants: [light wood, dark wood, iron ,lead]
     sigma = N/(4*inv_sigma_log*ring_count) # Standard deviation of Gaussian Blur
     
     # Create the log
@@ -62,7 +65,7 @@ def phantom(n_lead, n_steel, ring_count=50, N=5000, r=20, inv_sigma_ring = 1.25,
     return img
     
 if __name__ == "__main__":
-    im = phantom(2,2, ring_count = 50, plot = True)
+    im = phantom(2,2, ring_count = 50, plot = True, wood_type='Oak')
     # mdict = {'im': im}
     # savemat("new_testimage.mat",mdict, do_compression=True)
     
