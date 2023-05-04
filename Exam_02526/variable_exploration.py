@@ -13,13 +13,13 @@ start = time.time()
 data = np.array(scipy.io.loadmat("Exam_02526/testImage.mat")['im']) #Pixel size: 0.1 mm, 5000x5000 pixels
 
 # Load a resolution list
-res_list = np.array([50])
+res_list = np.array([200])
 N_outer = np.size(res_list)
 
 # Create a meshgrid for the internal colormaps
 n = 25
-theta_res_list = np.linspace(1,180,n) # np.array([1, 2, 3, 4, 5, 6])
-p_list = np.arange(1,n)*10 # np.array([30,40,50, 60, 70, 80, 90, 100])
+theta_res_list = np.linspace(1,180,n)
+p_list = np.arange(1,n)*10
 meshgrid_inner = np.meshgrid(theta_res_list, p_list)
 theta_mesh = meshgrid_inner[0].flatten()
 p_mesh = meshgrid_inner[1].flatten()
@@ -58,7 +58,7 @@ for i in range(N_outer):
 # Reshape the matrix so that the dimensions of the matrix correspond to the dimensions of the variables
 matrix_cond = np.reshape(matrix_cond, (np.size(res_list), np.size(p_list), np.size(theta_res_list)))
 matrix_cond[matrix_cond > 1e4] = 1e4
-matrix_cond[matrix_cond < 1e1] = 1e1
+matrix_cond[matrix_cond < 1e0] = 1e0
 
 
 fig, ax = plt.subplots(figsize = [4*res_list.size,4], ncols=res_list.size, sharex=True, layout='constrained')
@@ -67,7 +67,7 @@ tick_scale_factor = 4
 for i in range(res_list.size):
     #Create image for each resolution
     if res_list.size == 1 : ax = [ax] 
-    im=ax[i].imshow(matrix_cond[i,:,:], cmap="ocean", norm=LogNorm(1e1,1e4))
+    im=ax[i].imshow(matrix_cond[i,:,:], cmap="ocean", norm=LogNorm(1e0,1e4))
     
     # Define x- and yticks and set the resolution label
     ax[i].set_xticks(range(theta_res_list.size)[::tick_scale_factor], (theta_res_list).astype(int)[::tick_scale_factor])
