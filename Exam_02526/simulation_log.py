@@ -6,7 +6,7 @@ Created on Tue Sep 29 09:16:42 2020
 @author: bossema
 """
 
-
+print("Tester")
 import numpy as np
 from plank_phantom import phantom_plank
 import line_geometry as lg
@@ -15,15 +15,25 @@ from flexdata import display
 from flexdata import data
 from flextomo import projector
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 import time
 start = time.time()
+=======
+import matplotlib
+matplotlib.use('qtagg')
+import os
+>>>>>>> be938cb639bbd49cf442d283ef59123f9546deca
 #%%
 variable = 'angles'
 ringwidths = np.array([1.0])
 
 angles = np.array([0])
 #%% static parameters
+<<<<<<< HEAD
 save_path = 'Exam_02526/advanced_tree/'
+=======
+save_path = '/home/morten/Dokumenter/DTU/simulations/'
+>>>>>>> be938cb639bbd49cf442d283ef59123f9546deca
 sod = 200 #in mm
 odd = 400 # in mm
 
@@ -62,7 +72,8 @@ for j, ring_width in enumerate(ringwidths):
         #create phantom with tree ring size
         P = phantom_plank(phantom_size, angle = np.deg2rad(angle), p = pix_size, ring_width = ring_width, gaussian_blurr = 2).transpose([0,2,1])
         image = P[:,0,:]
-        plt.imsave(save_path +'phantoms/'+ name+'.png', image, vmin = -1, vmax =2, cmap = 'gray')
+        print(os.path.join(save_path,'phantoms/', name+'.png'))
+        plt.imsave(os.path.join(save_path,'phantoms/', name+'.png'), image, vmin = -1, vmax =2, cmap = 'gray')
         display.slice(P, title = 'Phantom', dim = 1, index = 0)
         print(f"time passed: {time.time()-start}")
 
