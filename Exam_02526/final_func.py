@@ -7,17 +7,19 @@ def final_func(angle_no,
                 sample_size=20, 
                 noise_limit = [1e-4, 1e-3], 
                 noise_size = 40, 
-                class_errors=True):
+                class_errors=True,
+                tree_type = 'beech'):
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.io import loadmat
-    # from scipy.linalg import solve
-    # from scipy.stats import alpha
+    from scipy.linalg import solve
     from skimage.measure import block_reduce
-    import paralleltomo # [A,theta,p,d] = paralleltomo(N,theta,p,d)
-    
+    import paralleltomo
+    import seaborn as sns
+    from phanton_generator import phantom
+
     # Load the image with lead and steel shot
-    data = np.array(loadmat("Exam_02526/new_testImage.mat")['im']) #Pixel size: 0.1 mm, 5000x5000 pixels
+    data = phantom(2,2, ring_count=1, wood_type=tree_type) #Pixel size: 0.1 mm, 5000x5000 pixels
 
     base_array = np.zeros(np.shape(data))   
     known_wood = np.copy(base_array); known_wood[data == np.unique(data)[[1]]] = 1
@@ -26,7 +28,7 @@ def final_func(angle_no,
 
     # Downsample image
     downsizing = int(5e3/res) # define downsizing constant
-    downsized_im = block_reduce(data, block_size=(downsizing, downsizing), func=np.mean) # downsample the image
+    downsized_im = block_reduce(data, block_size=(downsizing, downsizing), func=np.mean)*downsizing # downsample the image
     x = np.copy(downsized_im.flatten()) # flatten the attenuation constants
 
     downsized_known_wood = block_reduce(known_wood, block_size=downsizing, func=np.min).astype(int) # downsample the image
@@ -49,7 +51,7 @@ def final_func(angle_no,
     theta = np.array([np.linspace(0, 180, angle_no)]) 
     d = 0.5 # [m]
     N = downsized_im.shape[0]
-    [A,theta,p,d] = paralleltomo(N, theta, p)
+    [A,theta,p,d] = paralleltomo.paralleltomo(N, theta, p)
 
 
     # Load simulated forward projection 

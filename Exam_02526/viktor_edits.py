@@ -1,16 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-# from final_func import *
-from final_func import *
+from final_func import final_func
 
 #%% Change these parameters
 
-angle_no = 180 # Define the number of angles to be used in paralleltomo.
-p = 200 # Define the number of rays to be used in paralleltomo.
+angle_no = 25 # Define the number of angles to be used in paralleltomo.
+p = 55 # Define the number of rays to be used in paralleltomo.
 res = 25 # The picture will be (res x res). pixelwidth is (500/res mm)
 vol_pellet = 0.5 # Define how much of the pellet is inside the slice
-tree_type = 'beech' # can be 'beech'/'fir'
+tree_type = 'Beech' # can be 'beech'/'fir'
 
 #%%
 # Load start time
@@ -18,12 +17,12 @@ start = time.time()
 
 # Define the pure attenuation coefficients
 x_air = 0
-x_steel = 23.7*1e-2
-x_lead = 113*1e-2
-if tree_type == 'beech':
-    x_tree = 1.20*1e-2
-elif tree_type == 'fir':
-    x_tree = 1.20*1e-2
+x_steel = 64.5904*1e-2
+x_lead = 342.616*1e-2
+if tree_type == 'Beech':
+    x_tree = 0.2531236*1e-2
+elif tree_type == 'Fir':
+    x_tree = 0.167049375*1e-2
 
 # Define the attenuation coefficients that are inside the slice
 x_steel_found = vol_pellet*x_steel + (1-vol_pellet)*x_tree
@@ -35,13 +34,18 @@ print(f"the size of the pixels in the image is {pixel_width} mm")
 
 # Find the attenuation coefficients within the tree
 air_mean = 0
-tree_mean = x_tree
-steel_mean = (np.square(2)*x_steel + np.square(pixel_width)*x_tree)/np.square(pixel_width)
-lead_mean = (np.square(pixel_width)*x_lead + np.square(pixel_width)*x_tree)/np.square(pixel_width)
+tree_mean = x_tree*pixel_width/0.1
+steel_mean = (np.square(2)*x_steel + np.square(pixel_width)*x_tree)/np.square(pixel_width)*pixel_width/0.1
+lead_mean = (np.square(pixel_width)*x_lead + np.square(pixel_width)*x_tree)/np.square(pixel_width)*pixel_width/0.1
+
 # Find the point where the classes have equal probability of being
 air_tree_separator = (air_mean + tree_mean)/2
 tree_steel_separator = (tree_mean + steel_mean)/2
 steel_lead_separator = (steel_mean + lead_mean)/2
+
+print([air_mean, tree_mean, steel_mean, lead_mean])
+print([air_tree_separator, tree_steel_separator, steel_lead_separator])
+
 
 final_func(angle_no, 
             p, 
@@ -50,6 +54,10 @@ final_func(angle_no,
             tree_steel_separator, 
             steel_lead_separator, 
             class_errors=True,
-            sample_size=1)
+            sample_size=10,
+            tree_type=tree_type,
+            noise_limit=[2.5e-5, 1e-3]
+            )
 
+plt.show()
 
