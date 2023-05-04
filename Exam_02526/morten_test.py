@@ -11,8 +11,8 @@ p = 225
 angle_no = 180
 
 base_array = np.zeros(np.shape(data))   
-known_wood = np.copy(base_array); known_wood[(data > 0) & (data < 1.5e-1)] = 1
-known_iron= np.copy(base_array); known_iron[data == 1.5e-1] = 1
+known_wood = np.copy(base_array); known_wood[(data > 0) & (data < 6.5e-1)] = 1
+known_iron= np.copy(base_array); known_iron[data == 6.5e-1] = 1
 known_lead = np.copy(base_array); known_lead[data == 3.43] = 1
 
 # Downsample image
