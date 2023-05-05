@@ -64,6 +64,6 @@ for tree_type in tree_types:
                     ring_count = tree_ring_no,
                     vol_pellet = vol_pellet
                     )
-
+        print(f"Ended simulation in time: {start - time.time():0.1} seconds")
         plt.close('all')
 

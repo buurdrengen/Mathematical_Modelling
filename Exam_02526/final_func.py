@@ -117,9 +117,9 @@ def final_func(angle_no,
             if (wood_error > 0) & (failed_to_detect_wood == -1): failed_to_detect_wood = noise; print(f"FAIL: (at {i}) Failed To Detect Wood...")
             if (lead_error + iron_error > 0) & (failed_to_detect_metal == -1): failed_to_detect_metal = noise; print(f"FAIL: (at {i}) Failed To Detect Metal...")
 
-        print(f"Error[{i}] is {np.mean(wood_errors[i,:])} pm {confidence*np.std(wood_errors[i,:])}")
+        print(f"Error[{i}] is {np.mean(wood_errors[i,:]):0.4f} pm {confidence*np.std(wood_errors[i,:]):0.4f}        ", end = "\r")
 
-
+    print("")
     mean_error = np.mean(wood_errors,axis=1)
     std_error = np.std(wood_errors,axis=1)
 
