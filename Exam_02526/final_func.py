@@ -13,7 +13,6 @@ def final_func(angle_no,
                 vol_pellet=1):
     import numpy as np
     import matplotlib.pyplot as plt
-    from scipy.io import loadmat
     from scipy.linalg import solve
     from skimage.measure import block_reduce
     import paralleltomo
@@ -58,7 +57,7 @@ def final_func(angle_no,
 
     # Load simulated forward projection 
     b = A @ x # Finding bj
-    error_list = np.linspace(noise_limit[0], noise_limit[1], noise_size)
+    error_list = np.logspace(np.log10(noise_limit[0]), np.log10(noise_limit[1]), noise_size)
     wood_errors = np.zeros([np.size(error_list),sample_size])
     failed_to_detect_wood = -1
     failed_to_detect_metal = -1
@@ -114,13 +113,14 @@ def final_func(angle_no,
     plt.ylabel("Error Rate [%]", fontsize=14)
     plt.xlabel("Added noise level", fontsize=14)
     plt.ticklabel_format(axis='x', style='sci', scilimits=(-4,-4), useMathText=True)
-    plt.xlim([0,1e-3])
+    # plt.xlim([0,1e-3])
     plt.ylim([0,50])
+    plt.xscale('log')
     plt.tick_params(labelsize=11)
     plt.legend(fontsize=12)
     plt.grid()
     plt.title(f'Resolution: {500/res}X{500/res} [mm]\nSetup: {p} Rays, {angle_no} Angles and {sample_size} Samples', fontsize=16)
-    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}.png", dpi=300)
+    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}_{tree_type}.png", dpi=300)
     
 
     if class_errors==True:
@@ -155,7 +155,7 @@ def final_func(angle_no,
         cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
         cbar = fig.colorbar(im, cax=cbar_ax, ticks=[1, 2, 3, 4]) # Define colorbar
         cbar.ax.set_yticklabels(['Air', 'Tree', 'Iron', 'Lead']) # Define tick labels
-        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}.png")
+        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}.png")
 
 
         fig, ax3 = plt.subplots()
@@ -173,5 +173,5 @@ def final_func(angle_no,
         ax3.set_ylabel('Real Class')
         ax3.set_xlabel('Modelled Class')
         ax3.set_title('Confusion Matrix')
-        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}.png", dpi=300)
+        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}_{tree_type}.png", dpi=300)
 

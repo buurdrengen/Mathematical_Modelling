@@ -5,13 +5,13 @@ from final_func import final_func
 
 #%% Change these parameters
 
-angle_no = 90 # Define the number of angles to be used in paralleltomo.
-p = 110 # Define the number of rays to be used in paralleltomo.
-res = 50 # The picture will be (res x res). pixelwidth is (500/res mm)
+angle_no = 160 #[40, 80, 160]
+p = 210 # [55, 110, 210]
+res = 100 # [25, 250, 100] - pixelwidth is (500/res mm)
 vol_pellet = 0.5 # Define how much of the pellet is inside the slice
-tree_type = 'Fir' # can be 'beech'/'fir'
+tree_type = 'Beech' # can be 'beech'/'fir'
 tree_ring_no = 10
-noise_lim = [2.5e-10, 1e-1]
+noise_lim = [1e-5, 1e0]
 
 #%%
 # Load start time
