@@ -8,7 +8,7 @@ from final_func import final_func
 angle_no = [40, 80, 160]
 p = [55, 110, 210]
 res = [25, 50, 100] # - pixelwidth is (500/res mm)
-vol_pellet = 0.5 # Define how much of the pellet is inside the slice
+vol_pellet = 1 # Define how much of the pellet is inside the slice
 tree_types = ['Beech', 'Fir'] # can be 'beech'/'fir'
 tree_ring_no = 10
 noise_lim = [1e-4, 1e0]
