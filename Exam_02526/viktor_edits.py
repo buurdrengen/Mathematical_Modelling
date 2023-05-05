@@ -5,9 +5,9 @@ from final_func import final_func
 
 #%% Change these parameters
 
-angle_no = 160 #[40, 80, 160]
-p = 210 # [55, 110, 210]
-res = 100 # [25, 250, 100] - pixelwidth is (500/res mm)
+angle_no = 40 #[40, 80, 160]
+p = 55 # [55, 110, 210]
+res = 25 # [25, 50, 100] - pixelwidth is (500/res mm)
 vol_pellet = 0.5 # Define how much of the pellet is inside the slice
 tree_type = 'Beech' # can be 'beech'/'fir'
 tree_ring_no = 10
