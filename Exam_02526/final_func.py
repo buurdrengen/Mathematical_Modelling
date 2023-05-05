@@ -18,6 +18,8 @@ def final_func(angle_no,
     import paralleltomo
     import seaborn as sns
     from phanton_generator import phantom
+    from scipy.stats import maxwell
+
 
     # Load the image with lead and steel shot
     data = phantom(2,2, ring_count=ring_count, wood_type=tree_type) #Pixel size: 0.1 mm, 5000x5000 pixels
@@ -57,6 +59,13 @@ def final_func(angle_no,
 
     # Load simulated forward projection 
     b = A @ x # Finding bj
+    # plt.hist(b, bins=30)
+    # plt.xlabel(r"$b = \log (I_0 / I )$", fontsize=16)
+    # plt.ylabel(r"# of Detections", fontsize=16)
+    # plt.title(f"X-Ray Detector, Res:{res}X{res}", fontsize=20)
+    # plt.xlim([0, 40])
+    # plt.show()
+    # plt.close()
     error_list = np.logspace(np.log10(noise_limit[0]), np.log10(noise_limit[1]), noise_size)
     wood_errors = np.zeros([np.size(error_list),sample_size])
     failed_to_detect_wood = -1
@@ -64,7 +73,15 @@ def final_func(angle_no,
     for i, noise in enumerate(error_list):
         for j in range(sample_size):
             np.random.seed(j)
-            b_perturbed = b + np.random.normal(0, noise, size=np.shape(b)) # adding noise
+            
+            mu = noise
+            sigma = np.sqrt(noise)
+            a = sigma * np.sqrt(np.pi/(3*np.pi-8))
+            m = 2*a*np.sqrt(2/np.pi)
+            loc = mu - m
+            pertubation = maxwell.rvs(loc=loc, scale=a, size=np.size(b))
+            
+            b_perturbed = b + pertubation #np.random.normal(0, noise, size=np.shape(b)) # adding noise
 
             # Find the perturbed attenuation coefficients
             x_new = solve(A.T @ A, A.T @ b_perturbed, assume_a = "her")
@@ -83,7 +100,7 @@ def final_func(angle_no,
             wood_errors[i,j] = (wood_error*N_wood + iron_error*N_iron + lead_error*N_lead)/(N_lead + N_iron + N_wood)
 
             # Find the values in the confusion matrix
-            if noise == noise_limit[1]:
+            if noise == error_list[4*noise_size//5]:
                 lead_as_lead = np.sum(lead_index[downsized_known_lead == 1] == 1)
                 iron_as_lead = np.sum(lead_index[downsized_known_iron == 1] == 1)
                 wood_as_lead = np.sum(lead_index[downsized_known_wood == 1] == 1)
@@ -111,16 +128,16 @@ def final_func(angle_no,
     if failed_to_detect_wood >= 0: plt.axvline(failed_to_detect_wood, ls="--", color="orange", label="First False Positive")
     if failed_to_detect_metal >= 0: plt.axvline(failed_to_detect_metal, ls="--", color="red", label="First False Negative")
     plt.ylabel("Error Rate [%]", fontsize=14)
-    plt.xlabel("Added noise level", fontsize=14)
-    plt.ticklabel_format(axis='x', style='sci', scilimits=(-4,-4), useMathText=True)
-    # plt.xlim([0,1e-3])
+    plt.xlabel("Mean Noise Level", fontsize=14)
+    plt.ticklabel_format(axis='x', style='sci', scilimits=(-5,0), useMathText=True)
+    plt.xlim(noise_limit)
     plt.ylim([0,50])
     plt.xscale('log')
     plt.tick_params(labelsize=11)
     plt.legend(fontsize=12)
     plt.grid()
     plt.title(f'Resolution: {500/res}X{500/res} [mm]\nSetup: {p} Rays, {angle_no} Angles and {sample_size} Samples', fontsize=16)
-    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}_{tree_type}.png", dpi=300)
+    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}_{tree_type}_maxwell.png", dpi=300)
     
 
     if class_errors==True:
@@ -147,7 +164,7 @@ def final_func(angle_no,
         cmap = plt.get_cmap('viridis', 4) # Define the colormap
         im = ax1.imshow(class_tree, cmap=cmap, vmin=0.5, vmax=4.5)
         im = ax2.imshow(class_tree_true, cmap=cmap, vmin=0.5, vmax=4.5)
-        fig.suptitle(f'Classification Comparison of Noise: {noise_limit[1]}')
+        fig.suptitle(f'Classification Comparison of Noise: {error_list[4*noise_size//5]:0.2f}')
         ax1.set_title('Modelled Classes')
         ax2.set_title('Real Classes')
 
@@ -155,7 +172,7 @@ def final_func(angle_no,
         cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
         cbar = fig.colorbar(im, cax=cbar_ax, ticks=[1, 2, 3, 4]) # Define colorbar
         cbar.ax.set_yticklabels(['Air', 'Tree', 'Iron', 'Lead']) # Define tick labels
-        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}.png")
+        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}_maxwell.png")
 
 
         fig, ax3 = plt.subplots()
@@ -173,5 +190,5 @@ def final_func(angle_no,
         ax3.set_ylabel('Real Class')
         ax3.set_xlabel('Modelled Class')
         ax3.set_title('Confusion Matrix')
-        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}_{tree_type}.png", dpi=300)
+        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}_{tree_type}_maxwell.png", dpi=300)
 
