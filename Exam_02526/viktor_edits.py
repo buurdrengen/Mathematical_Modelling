@@ -37,8 +37,8 @@ print(f"the size of the pixels in the image is {pixel_width} mm")
 # Find the attenuation coefficients within the tree
 air_mean = 0
 tree_mean = x_tree*pixel_width/0.1
-steel_mean = (np.square(2)*x_steel + np.square(pixel_width-2)*x_tree)/np.square(pixel_width)*pixel_width/0.1
-lead_mean = (np.square(2)*x_lead + np.square(pixel_width-2)*x_tree)/np.square(pixel_width)*pixel_width/0.1
+steel_mean = (np.pi*x_steel_found + (np.square(pixel_width)-np.pi)*x_tree)/np.square(pixel_width)*pixel_width/0.1
+lead_mean = (np.pi*x_lead_found + (np.square(pixel_width)-np.pi)*x_tree)/np.square(pixel_width)*pixel_width/0.1
 
 # Find the point where the classes have equal probability of being
 air_tree_separator = (air_mean + tree_mean)/2
