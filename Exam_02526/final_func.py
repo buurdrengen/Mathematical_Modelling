@@ -10,7 +10,8 @@ def final_func(angle_no,
                 class_errors=True,
                 tree_type = 'beech',
                 ring_count = 10,
-                vol_pellet=1):
+                vol_pellet=1,
+                r = 20):
     import numpy as np
     import matplotlib.pyplot as plt
     from scipy.linalg import solve
@@ -22,7 +23,7 @@ def final_func(angle_no,
 
 
     # Load the image with lead and steel shot
-    data = phantom(2,2, ring_count=ring_count, wood_type=tree_type) #Pixel size: 0.1 mm, 5000x5000 pixels
+    data = phantom(2,2, ring_count=ring_count, wood_type=tree_type, r = r) #Pixel size: 0.1 mm, 5000x5000 pixels
 
     base_array = np.zeros(np.shape(data))   
     known_wood = np.copy(base_array); known_wood[(data > 0) & (data < 6.5e-1)] = 1
@@ -53,8 +54,11 @@ def final_func(angle_no,
     # Initialize system matrix and stuff
     theta = np.array([np.linspace(0, 180, angle_no)]) 
     d = 0.5 # [m]
+
     N = downsized_im.shape[0]
     [A,theta,p,d] = paralleltomo.paralleltomo(N, theta, p)
+    AT = A.T
+    ATA = AT @ A
 
 
     # Load simulated forward projection 
@@ -85,7 +89,7 @@ def final_func(angle_no,
             b_perturbed = b + pertubation # # adding noise
 
             # Find the perturbed attenuation coefficients
-            x_new = solve(A.T @ A, A.T @ b_perturbed, assume_a = "her")
+            x_new = solve(ATA, AT @ b_perturbed, assume_a = "her")
             x_new = x_new.reshape(np.shape(downsized_im)) 
 
             # Find the index for the different classes
@@ -144,7 +148,7 @@ def final_func(angle_no,
                 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
                 cbar = fig.colorbar(im, cax=cbar_ax, ticks=[1, 2, 3, 4]) # Define colorbar
                 cbar.ax.set_yticklabels(['Air', 'Tree', 'Iron', 'Lead']) # Define tick labels
-                plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}_normal_{100*i//noise_size}pct.png")
+                plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}_normal_{100*i//noise_size}pct_new.png")
                 plt.close()
                 
 
@@ -172,7 +176,7 @@ def final_func(angle_no,
     plt.legend(fontsize=12)
     plt.grid()
     plt.title(f'Resolution: {500/res}X{500/res} [mm]\nSetup: {p} Rays, {angle_no} Angles and {sample_size} Samples', fontsize=16)
-    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}_{tree_type}_normal.png", dpi=300)
+    plt.savefig(f"Exam_02526/img/res{res}_{vol_pellet}_{tree_type}_normal_new.png", dpi=300)
     
 
     if class_errors==True:
@@ -207,7 +211,7 @@ def final_func(angle_no,
         cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
         cbar = fig.colorbar(im, cax=cbar_ax, ticks=[1, 2, 3, 4]) # Define colorbar
         cbar.ax.set_yticklabels(['Air', 'Tree', 'Iron', 'Lead']) # Define tick labels
-        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}_normal.png")
+        plt.savefig(f"Exam_02526/img/classification_{res}_{vol_pellet}_{tree_type}_normal_new.png")
 
 
         fig, ax3 = plt.subplots()
@@ -225,5 +229,5 @@ def final_func(angle_no,
         ax3.set_ylabel('Real Class')
         ax3.set_xlabel('Modelled Class')
         ax3.set_title('Confusion Matrix')
-        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}_{tree_type}_normal.png", dpi=300)
+        plt.savefig(f"Exam_02526/img/confusion_{res}_{vol_pellet}_{tree_type}_normal_new.png", dpi=300)
 

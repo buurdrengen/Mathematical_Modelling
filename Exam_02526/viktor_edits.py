@@ -8,8 +8,8 @@ from final_func import final_func
 angle_no = [40, 80, 160]
 p = [55, 110, 210]
 res = [25, 50, 100] # - pixelwidth is (500/res mm)
-vol_pellets = [0.5, 1] # Define how much of the pellet is inside the slice
-tree_types = ['Beech', 'Fir'] # can be 'beech'/'fir'
+vol_pellets = [0.5] # Define how much of the pellet is inside the slice
+tree_types = ['Beech'] # can be 'beech'/'fir'
 tree_ring_no = 10
 noise_lim = [1e-4, 1e0]
 
@@ -62,7 +62,8 @@ for tree_type in tree_types:
                         tree_type=tree_type,
                         noise_limit=noise_lim,
                         ring_count = tree_ring_no,
-                        vol_pellet = vol_pellet
+                        vol_pellet = vol_pellet,
+                        r = 10
                         )
             print(f"Ended simulation in time: {time.strftime('%H:%M:%S', time.gmtime(time.time()-start))}")
             plt.close('all')
